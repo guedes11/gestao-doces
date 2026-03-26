@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gestão de Doces</title>
     
-    <!-- Configurações PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9.5 7.5-2 2a4.95 4.95 0 1 0 7 7l2-2a4.95 4.95 0 1 0-7-7Z'/%3E%3Cpath d='M14 6.5v10'/%3E%3Cpath d='M10 7.5v10'/%3E%3Cpath d='m16 7 1-5 1.36.68A3 3 0 0 0 19.7 3h.3v.3a3 3 0 0 0-.68 1.34L20 6l-4 1Z'/%3E%3Cpath d='m8 17-1 5-1.36-.68A3 3 0 0 0 4.3 21H4v-.3a3 3 0 0 0 .68-1.34L4 18l4-1Z'/%3E%3C/svg%3E">
 
-    <!-- Bibliotecas Externas -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -78,7 +76,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        const APP_VERSION = "2.2.0"; 
+        const APP_VERSION = "2.3.0"; 
 
         const ICONS = {
             store: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>`,
@@ -110,7 +108,6 @@
         );
 
         function App() {
-            // Inicialização Segura
             const safeLoad = (key, defaultVal) => {
                 try { 
                     const item = localStorage.getItem(key);
@@ -125,7 +122,6 @@
             const [pagamentos, setPagamentos] = useState(() => safeLoad('g_doces_pagamentos', []));
             const [logsPagamentos, setLogsPagamentos] = useState(() => safeLoad('g_doces_logs', []));
 
-            // Efeitos de Gravação
             useEffect(() => {
                 document.documentElement.className = `tema-${tema}`;
                 localStorage.setItem('g_doces_tema', tema);
@@ -137,7 +133,6 @@
             useEffect(() => { localStorage.setItem('g_doces_pagamentos', JSON.stringify(pagamentos)); }, [pagamentos]);
             useEffect(() => { localStorage.setItem('g_doces_logs', JSON.stringify(logsPagamentos)); }, [logsPagamentos]);
 
-            // Interface
             const [abaAtiva, setAbaAtiva] = useState('resumo'); 
             const [modalVenda, setModalVenda] = useState({ aberto: false, clienteId: null, clienteNome: '' });
             const [doceSelecionado, setDoceSelecionado] = useState('');
@@ -196,14 +191,13 @@
                             },
                             aberto: true
                         });
-                    } catch (err) { mostrarToast("Erro ao ler ficheiro.", "erro"); }
+                    } catch (err) { mostrarToast("Erro ao ler arquivo.", "erro"); }
                 };
                 reader.readAsText(file);
             };
 
             const gerarId = () => Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
 
-            // Operações
             const adicionarCliente = (e) => {
                 e.preventDefault();
                 setClientes([...clientes, { ...novoCliente, id: gerarId() }]);
@@ -220,7 +214,7 @@
 
             const removerCliente = (id) => {
                 setModalConfirm({
-                    mensagem: "Eliminar cliente e as suas dívidas permanentemente?",
+                    mensagem: "Excluir cliente e suas dívidas permanentemente?",
                     onConfirm: () => {
                         setClientes(clientes.filter(c => c.id !== id));
                         setVendas(vendas.filter(v => v.clienteId !== id));
@@ -335,9 +329,9 @@
 
             return (
                 <div className="min-h-screen relative pb-24 transition-colors duration-300">
-                    <header className="bg-tcard pt-10 pb-5 px-6 border-b border-tborder sticky top-0 z-10 shadow-sm flex justify-center items-center">
+                    <header className="bg-tcard pt-10 pb-5 px-6 border-b border-tborder sticky top-0 z-10 shadow-sm flex justify-center items-center transition-colors">
                         <h1 className="text-xl font-extrabold text-indigo-500 uppercase tracking-widest text-center">Gestão de Doces</h1>
-                        <button onClick={() => setModalAjustes(true)} className="absolute right-6 p-2 bg-slate-500/10 rounded-full text-tmuted">
+                        <button onClick={() => setModalAjustes(true)} className="absolute right-6 p-2 bg-slate-500/10 rounded-full text-tmuted outline-none transition-colors">
                             <Icon name="settings" className="w-5 h-5" />
                         </button>
                     </header>
@@ -373,14 +367,14 @@
 
                                                 return (
                                                     <div key={c.id} className="bg-tcard rounded-xl border border-tborder shadow-sm overflow-hidden transition-colors">
-                                                        <div className="p-4 flex justify-between items-center cursor-pointer active:bg-slate-500/5" onClick={() => setClientesExpandidos(exp ? clientesExpandidos.filter(id=>id!==c.id) : [...clientesExpandidos, c.id])}>
+                                                        <div className="p-4 flex justify-between items-center cursor-pointer active:bg-slate-500/5 transition-colors" onClick={() => setClientesExpandidos(exp ? clientesExpandidos.filter(id=>id!==c.id) : [...clientesExpandidos, c.id])}>
                                                             <div className="flex-1">
                                                                 <div className="flex items-center"><h4 className="font-bold text-tmain mr-2 text-lg">{c.nome}</h4><Icon name={exp?'chevron-up':'chevron-down'} className={`w-4 h-4 ${exp?'text-indigo-500':'text-tmuted'}`} /></div>
-                                                                <div className="flex items-center space-x-2 mt-1"><span className="bg-slate-500/10 text-tmuted text-[10px] px-2 py-0.5 rounded font-bold uppercase">{c.departamento}</span>{!exp && saldo > 0.01 && <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded">R$ {saldo.toFixed(2)}</span>}</div>
+                                                                <div className="flex items-center space-x-2 mt-1"><span className="bg-slate-500/10 text-tmuted text-[10px] px-2 py-0.5 rounded font-bold uppercase">{c.departamento}</span>{!exp && saldo > 0.01 && <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded">R$ {saldo.toFixed(2).replace('.', ',')}</span>}</div>
                                                             </div>
                                                             <div className="flex items-center space-x-1">
-                                                                {c.whatsapp && <button onClick={(e)=>{e.stopPropagation(); window.open(`https://wa.me/55${c.whatsapp.replace(/\D/g,'')}`)}} className="p-2 text-emerald-500"><Icon name="phone" className="w-5 h-5" /></button>}
-                                                                {exp && <button onClick={(e)=>{e.stopPropagation(); setModalVenda({aberto:true, clienteId:c.id, clienteNome:c.nome}); setErroVenda('');}} className="bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center shadow-lg shadow-indigo-500/20 active:scale-95"><Icon name="shopping-cart" className="w-4 h-4 mr-1" /> Vender</button>}
+                                                                {c.whatsapp && <button onClick={(e)=>{e.stopPropagation(); window.open(`https://wa.me/55${c.whatsapp.replace(/\D/g,'')}`)}} className="p-2 text-emerald-500 transition-transform active:scale-90"><Icon name="phone" className="w-5 h-5" /></button>}
+                                                                {exp && <button onClick={(e)=>{e.stopPropagation(); setModalVenda({aberto:true, clienteId:c.id, clienteNome:c.nome}); setErroVenda('');}} className="bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center shadow-lg active:scale-95 transition-all"><Icon name="shopping-cart" className="w-4 h-4 mr-1" /> Vender</button>}
                                                             </div>
                                                         </div>
                                                         {exp && (
@@ -391,12 +385,12 @@
                                                                             {vens.map(v => (
                                                                                 <div key={v.id} className="flex justify-between items-center text-sm border-b border-tborder/50 pb-2">
                                                                                     <div className="flex flex-col"><span className="font-semibold text-tmain">{v.doceNome}</span><span className="text-[10px] text-tmuted">{v.data}</span></div>
-                                                                                    <div className="flex items-center space-x-2"><span className="font-bold text-tmain">R$ {v.preco.toFixed(2)}</span><button onClick={()=>removerVenda(v.id, v.doceId, v.doceNome)} className="text-red-500 p-1"><Icon name="x" className="w-4 h-4" /></button></div>
+                                                                                    <div className="flex items-center space-x-2"><span className="font-bold text-tmain">R$ {v.preco.toFixed(2).replace('.', ',')}</span><button onClick={()=>removerVenda(v.id, v.doceId, v.doceNome)} className="text-red-500 p-1"><Icon name="x" className="w-4 h-4" /></button></div>
                                                                                 </div>
                                                                             ))}
                                                                         </div>
                                                                         <div className="flex justify-between items-end pt-2 border-t border-tborder">
-                                                                            <div><p className="text-[10px] text-tmuted uppercase font-bold">Pendente</p><p className="text-xl font-black text-red-500">R$ {saldo.toFixed(2).replace('.',',')}</p></div>
+                                                                            <div><p className="text-[10px] text-tmuted uppercase font-bold tracking-wider">Pendente</p><p className="text-xl font-black text-red-500">R$ {saldo.toFixed(2).replace('.',',')}</p></div>
                                                                             {saldo > 0.01 && <button onClick={()=> {setModalPagamento({aberto:true, clienteId:c.id, clienteNome:c.nome, totalDevido:saldo}); setValorPagamento(saldo.toFixed(2));}} className="bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all">Receber</button>}
                                                                         </div>
                                                                     </>
@@ -417,16 +411,16 @@
                                 <div className="bg-tcard p-6 rounded-2xl border border-tborder shadow-sm">
                                     <h2 className="text-lg font-bold text-tmain mb-4 flex items-center border-b border-tborder pb-2"><Icon name="users" className="w-5 h-5 mr-2 text-indigo-500" /> Novo Cliente</h2>
                                     <form onSubmit={adicionarCliente} className="space-y-4">
-                                        <input type="text" placeholder="Nome *" required className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder" value={novoCliente.nome} onChange={e=>setNovoCliente({...novoCliente, nome:e.target.value})} />
-                                        <input type="text" placeholder="Departamento *" required className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder" value={novoCliente.departamento} onChange={e=>setNovoCliente({...novoCliente, departamento:e.target.value})} />
-                                        <input type="tel" placeholder="WhatsApp" className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder" value={novoCliente.whatsapp} onChange={e=>setNovoCliente({...novoCliente, whatsapp:e.target.value})} />
-                                        <button className="w-full bg-indigo-500 text-white p-3.5 rounded-xl font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">Salvar Cliente</button>
+                                        <input type="text" placeholder="Nome *" required className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors" value={novoCliente.nome} onChange={e=>setNovoCliente({...novoCliente, nome:e.target.value})} />
+                                        <input type="text" placeholder="Departamento *" required className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors" value={novoCliente.departamento} onChange={e=>setNovoCliente({...novoCliente, departamento:e.target.value})} />
+                                        <input type="tel" placeholder="WhatsApp (DDD + Número)" className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors" value={novoCliente.whatsapp} onChange={e=>setNovoCliente({...novoCliente, whatsapp:e.target.value})} />
+                                        <button className="w-full bg-indigo-500 text-white p-3.5 rounded-xl font-bold shadow-lg active:scale-95 transition-all">Salvar Cliente</button>
                                     </form>
                                 </div>
                                 <div className="space-y-3">
                                     {clientes.map(c => (
-                                        <div key={c.id} className="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm">
-                                            <div><p className="font-bold text-tmain">{c.nome}</p><p className="text-[10px] text-tmuted uppercase">{c.departamento}</p></div>
+                                        <div key={c.id} className="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm transition-colors">
+                                            <div><p className="font-bold text-tmain">{c.nome}</p><p className="text-[10px] text-tmuted uppercase font-bold tracking-wide">{c.departamento}</p></div>
                                             <div className="flex space-x-1">
                                                 <button onClick={()=>setEditandoCliente({...c})} className="p-2 text-indigo-500 active:scale-90 transition-transform"><Icon name="edit-2" className="w-5 h-5" /></button>
                                                 <button onClick={()=>removerCliente(c.id)} className="p-2 text-red-500 active:scale-90 transition-transform"><Icon name="trash-2" className="w-5 h-5" /></button>
@@ -442,20 +436,20 @@
                                 <div className="bg-tcard p-6 rounded-2xl border border-tborder shadow-sm">
                                     <h2 className="text-lg font-bold text-tmain mb-4 flex items-center border-b border-tborder pb-2"><Icon name="candy" className="w-5 h-5 mr-2 text-indigo-500" /> Novo Produto</h2>
                                     <form onSubmit={adicionarDoce} className="space-y-4">
-                                        <input type="text" placeholder="Nome *" required className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder" value={novoDoce.nome} onChange={e=>setNovoDoce({...novoDoce, nome:e.target.value})} />
+                                        <input type="text" placeholder="Nome *" required className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors" value={novoDoce.nome} onChange={e=>setNovoDoce({...novoDoce, nome:e.target.value})} />
                                         <div className="flex space-x-4">
-                                            <input type="number" step="0.01" placeholder="Preço *" required className="w-1/2 p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder" value={novoDoce.preco} onChange={e=>setNovoDoce({...novoDoce, preco:e.target.value})} />
-                                            <input type="number" placeholder="Estoque *" required className="w-1/2 p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder" value={novoDoce.estoque} onChange={e=>setNovoDoce({...novoDoce, estoque:e.target.value})} />
+                                            <input type="number" step="0.01" placeholder="Preço R$*" required className="w-1/2 p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors" value={novoDoce.preco} onChange={e=>setNovoDoce({...novoDoce, preco:e.target.value})} />
+                                            <input type="number" placeholder="Estoque *" required className="w-1/2 p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors" value={novoDoce.estoque} onChange={e=>setNovoDoce({...novoDoce, estoque:e.target.value})} />
                                         </div>
-                                        <button className="w-full bg-indigo-500 text-white p-3.5 rounded-xl font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">Salvar Produto</button>
+                                        <button className="w-full bg-indigo-500 text-white p-3.5 rounded-xl font-bold shadow-lg active:scale-95 transition-all">Salvar Produto</button>
                                     </form>
                                 </div>
                                 <div className="space-y-3">
                                     {doces.map(d => (
-                                        <div key={d.id} className="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm">
+                                        <div key={d.id} className="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm transition-colors">
                                             <div className="flex items-center space-x-3">
                                                 <div className={`p-2 rounded-lg ${d.estoque>0?'bg-indigo-500/10 text-indigo-500':'bg-slate-500/10 text-tmuted'}`}><Icon name="candy" className="w-5 h-5" /></div>
-                                                <div><p className={`font-bold transition-colors ${d.estoque>0?'text-tmain':'text-tmuted line-through'}`}>{d.nome}</p><p className="text-xs text-tmuted font-bold">R$ {d.preco.toFixed(2)} | {d.estoque} un.</p></div>
+                                                <div><p className={`font-bold transition-colors ${d.estoque>0?'text-tmain':'text-tmuted line-through'}`}>{d.nome}</p><p className="text-xs text-tmuted font-bold uppercase tracking-wide">R$ {d.preco.toFixed(2).replace('.', ',')} | {d.estoque} un.</p></div>
                                             </div>
                                             <div className="flex space-x-1">
                                                 <button onClick={()=>setEditandoDoce({...d, preco: d.preco.toString(), estoque: d.estoque.toString()})} className="p-2 text-indigo-500 active:scale-90 transition-transform"><Icon name="edit-2" className="w-5 h-5" /></button>
@@ -473,13 +467,13 @@
                                     <div className="absolute -left-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                                     <Icon name="history" className="w-10 h-10 mx-auto mb-2" />
                                     <p className="text-emerald-100 text-[10px] font-bold uppercase tracking-widest">Total Arrecadado</p>
-                                    <p className="text-4xl font-black">R$ {logsPagamentos.reduce((a,c)=>a+c.valor,0).toFixed(2).replace('.',',')}</p>
+                                    <p className="text-4xl font-black tracking-tight">R$ {logsPagamentos.reduce((a,c)=>a+c.valor,0).toFixed(2).replace('.',',')}</p>
                                 </div>
                                 <div className="space-y-3">
                                     {[...logsPagamentos].sort((a,b)=>b.timestamp-a.timestamp).map(l => (
-                                        <div key={l.id} className="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm">
-                                            <div className="flex flex-col"><span className="font-bold text-tmain">{l.clienteNome}</span><span className="text-[10px] text-tmuted">{l.data} às {l.hora}</span></div>
-                                            <div className="flex items-center space-x-3"><span className="font-bold text-emerald-500 text-lg">+ R$ {l.valor.toFixed(2)}</span><button onClick={()=>removerLogPagamento(l.id)} className="text-red-500 p-1 active:scale-90 transition-transform"><Icon name="trash-2" className="w-4 h-4" /></button></div>
+                                        <div key={l.id} className="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm transition-colors">
+                                            <div className="flex flex-col"><span className="font-bold text-tmain">{l.clienteNome}</span><span className="text-[10px] text-tmuted font-medium uppercase">{l.data} às {l.hora}</span></div>
+                                            <div className="flex items-center space-x-3"><span className="font-bold text-emerald-500 text-lg">+ R$ {l.valor.toFixed(2).replace('.', ',')}</span><button onClick={()=>removerLogPagamento(l.id)} className="text-red-500 p-1 active:scale-90 transition-transform"><Icon name="trash-2" className="w-4 h-4" /></button></div>
                                         </div>
                                     ))}
                                 </div>
@@ -489,143 +483,140 @@
 
                     {/* NAVEGAÇÃO INFERIOR */}
                     <nav className="fixed bottom-0 left-0 right-0 bg-tcard border-t border-tborder pb-safe z-20 shadow-lg flex justify-around p-2 transition-colors">
-                        <button onClick={()=>setAbaAtiva('resumo')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='resumo'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="layout-dashboard" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase">Vendas</span></button>
-                        <button onClick={()=>setAbaAtiva('clientes')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='clientes'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="users" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase">Clientes</span></button>
-                        <button onClick={()=>setAbaAtiva('doces')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='doces'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="candy" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase">Estoque</span></button>
-                        <button onClick={()=>setAbaAtiva('caixa')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='caixa'?'text-emerald-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="wallet" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase">Caixa</span></button>
+                        <button onClick={()=>setAbaAtiva('resumo')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='resumo'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="layout-dashboard" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Vendas</span></button>
+                        <button onClick={()=>setAbaAtiva('clientes')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='clientes'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="users" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Clientes</span></button>
+                        <button onClick={()=>setAbaAtiva('doces')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='doces'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="candy" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Estoque</span></button>
+                        <button onClick={()=>setAbaAtiva('caixa')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='caixa'?'text-emerald-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="wallet" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Caixa</span></button>
                     </nav>
 
-                    {/* MODAL CONFIGURAÇÕES */}
+                    {/* MODAIS */}
                     {modalAjustes && (
-                        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
-                            <div className="bg-tcard rounded-3xl p-6 w-full max-w-sm border border-tborder shadow-2xl scale-in-center">
+                        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
+                            <div className="bg-tcard rounded-3xl p-6 w-full max-w-sm border border-tborder shadow-2xl">
                                 <div className="flex justify-between items-center mb-6 border-b border-tborder pb-4">
                                     <h3 className="text-lg font-bold text-tmain flex items-center"><Icon name="settings" className="w-5 h-5 mr-2 text-indigo-500" /> Configurações</h3>
                                     <button onClick={()=>setModalAjustes(false)} className="text-tmuted bg-slate-500/10 p-2 rounded-full active:scale-90 transition-all"><Icon name="x" className="w-5 h-5" /></button>
                                 </div>
                                 <div className="space-y-6">
                                     <div>
-                                        <label className="text-[10px] font-black text-tmuted uppercase mb-3 block tracking-widest text-center">Tema Visual</label>
-                                        <div className="flex bg-tinput p-1.5 rounded-2xl border border-tborder">
+                                        <label className="text-[10px] font-black text-tmuted uppercase mb-3 block tracking-widest text-center opacity-70">Tema Visual</label>
+                                        <div className="flex bg-tinput p-1.5 rounded-2xl border border-tborder transition-colors">
                                             {['claro','medio','escuro'].map(t=>(
-                                                <button key={t} onClick={()=>setTema(t)} className={`flex-1 py-3 rounded-xl text-xs font-black capitalize transition-all ${tema===t?'bg-tcard text-indigo-500 shadow-xl shadow-indigo-500/10 border border-tborder':'text-tmuted hover:text-tmain'}`}>{t}</button>
+                                                <button key={t} onClick={()=>setTema(t)} className={`flex-1 py-3 rounded-xl text-xs font-black capitalize transition-all ${tema===t?'bg-tcard text-indigo-500 shadow-xl border border-tborder':'text-tmuted hover:text-tmain'}`}>{t}</button>
                                             ))}
                                         </div>
                                     </div>
                                     <div className="border-t border-tborder pt-6 space-y-3">
-                                        <button onClick={exportarDados} className="w-full flex items-center justify-center p-4 bg-indigo-500/10 text-indigo-500 font-black text-sm rounded-2xl border border-indigo-500/20 active:scale-95 transition-all shadow-lg shadow-indigo-500/5"><Icon name="download" className="w-4 h-4 mr-2" /> Salvar Backup</button>
+                                        <button onClick={exportarDados} className="w-full flex items-center justify-center p-4 bg-indigo-500/10 text-indigo-500 font-black text-sm rounded-2xl border border-indigo-500/20 active:scale-95 transition-all"><Icon name="download" className="w-4 h-4 mr-2" /> Salvar Backup</button>
                                         <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={e=>{importarDados(e); setModalAjustes(false);}} />
                                         <button onClick={()=>fileInputRef.current.click()} className="w-full flex items-center justify-center p-4 bg-slate-500/10 text-tmuted font-black text-sm rounded-2xl border border-tborder active:scale-95 transition-all"><Icon name="upload" className="w-4 h-4 mr-2" /> Restaurar Backup</button>
                                     </div>
-                                    <p className="text-[10px] text-tmuted text-center font-bold tracking-widest">VERSÃO {APP_VERSION}</p>
+                                    <div className="text-center space-y-1 pt-2 opacity-60">
+                                        <p className="text-[10px] text-tmuted font-bold tracking-widest uppercase">Versão {APP_VERSION}</p>
+                                        <p className="text-[9px] text-indigo-500/80 font-black uppercase tracking-tighter">Desenvolvido por Gemini</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* MODAL VENDA */}
                     {modalVenda.aberto && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl">
-                                <div className="flex justify-between items-center mb-8"><h3 className="text-2xl font-black text-tmain">Nova Venda</h3><button onClick={()=>setModalVenda({aberto:false})} className="p-2 text-tmuted bg-slate-500/10 rounded-full"><Icon name="x" className="w-6 h-6" /></button></div>
+                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
+                                <div className="flex justify-between items-center mb-8"><h3 className="text-2xl font-black text-tmain">Nova Venda</h3><button onClick={()=>setModalVenda({aberto:false})} className="p-2 text-tmuted bg-slate-500/10 rounded-full active:scale-90 transition-transform"><Icon name="x" className="w-6 h-6" /></button></div>
                                 <form onSubmit={registrarVenda} className="space-y-6">
                                     <p className="text-sm font-bold text-tmuted uppercase tracking-widest text-center">Cliente: <span className="text-indigo-500 font-black">{modalVenda.clienteNome}</span></p>
                                     <div className="flex space-x-3">
-                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center">Doce</label>
-                                            <select required className="w-full p-5 rounded-3xl bg-tinput text-tmain outline-none font-bold text-sm border border-tborder" value={doceSelecionado} onChange={e=>{setDoceSelecionado(e.target.value); setErroVenda('');}}>
-                                                <option value="" disabled>Escolher...</option>
-                                                {doces.map(d=><option key={d.id} value={d.id} disabled={d.estoque<=0}>{d.nome} (R$ {d.preco.toFixed(2)})</option>)}
+                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center opacity-70">Produto</label>
+                                            <select required className="w-full p-5 rounded-3xl bg-tinput text-tmain outline-none font-bold text-sm border border-tborder transition-colors" value={doceSelecionado} onChange={e=>{setDoceSelecionado(e.target.value); setErroVenda('');}}>
+                                                <option value="" disabled>Escolher doce...</option>
+                                                {doces.map(d=><option key={d.id} value={d.id} disabled={d.estoque<=0}>{d.nome} (R$ {d.preco.toFixed(2).replace('.', ',')})</option>)}
                                             </select>
                                         </div>
-                                        <div className="w-24"><label className="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center">Qtd</label>
-                                            <input type="number" min="1" required className="w-full p-5 rounded-3xl bg-tinput text-tmain text-center font-black border border-tborder" value={quantidadeVenda} onChange={e=>{setQuantidadeVenda(e.target.value); setErroVenda('');}} />
+                                        <div className="w-24"><label className="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center opacity-70">Qtd</label>
+                                            <input type="number" min="1" required className="w-full p-5 rounded-3xl bg-tinput text-tmain text-center font-black border border-tborder transition-colors" value={quantidadeVenda} onChange={e=>{setQuantidadeVenda(e.target.value); setErroVenda('');}} />
                                         </div>
                                     </div>
                                     {erroVenda && <p className="text-xs text-red-500 font-black bg-red-500/10 p-4 rounded-2xl border border-red-500/20 text-center">{erroVenda}</p>}
-                                    <button className="w-full bg-indigo-500 text-white p-6 rounded-[30px] font-black text-xl shadow-2xl shadow-indigo-500/30 active:scale-95 transition-all">Confirmar</button>
+                                    <button className="w-full bg-indigo-500 text-white p-6 rounded-[30px] font-black text-xl shadow-2xl active:scale-95 transition-all">Confirmar</button>
                                 </form>
                             </div>
                         </div>
                     )}
 
-                    {/* EDIÇÃO DOCE */}
                     {editandoDoce && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl">
+                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
                                 <h3 className="text-2xl font-black text-tmain mb-8 text-center uppercase tracking-tighter">Editar Produto</h3>
                                 <form onSubmit={atualizarDoce} className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest">Nome do Produto</label>
+                                    <label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70">Nome do Produto</label>
                                     <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoDoce.nome} onChange={e=>setEditandoDoce({...editandoDoce, nome:e.target.value})} />
                                     <div className="flex space-x-3">
-                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest">Preço R$</label>
+                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70">Preço R$</label>
                                             <input type="number" step="0.01" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoDoce.preco} onChange={e=>setEditandoDoce({...editandoDoce, preco:e.target.value})} />
                                         </div>
-                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest">Estoque</label>
+                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70">Estoque</label>
                                             <input type="number" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoDoce.estoque} onChange={e=>setEditandoDoce({...editandoDoce, estoque:e.target.value})} />
                                         </div>
                                     </div>
                                     <div className="flex space-x-3 pt-6">
                                         <button type="button" onClick={()=>setEditandoDoce(null)} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all">Cancelar</button>
-                                        <button className="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl shadow-indigo-500/20 active:scale-95 transition-all">Gravar</button>
+                                        <button className="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl active:scale-95 transition-all">Salvar</button>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     )}
 
-                    {/* EDIÇÃO CLIENTE */}
                     {editandoCliente && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl">
+                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
                                 <h3 className="text-2xl font-black text-tmain mb-8 text-center uppercase tracking-tighter">Editar Cliente</h3>
                                 <form onSubmit={atualizarCliente} className="space-y-4">
-                                    <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoCliente.nome} onChange={e=>setEditandoCliente({...editandoCliente, nome:e.target.value})} />
-                                    <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoCliente.departamento} onChange={e=>setEditandoCliente({...editandoCliente, departamento:e.target.value})} />
-                                    <input type="tel" className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoCliente.whatsapp} onChange={e=>setEditandoCliente({...editandoCliente, whatsapp:e.target.value})} />
+                                    <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" value={editandoCliente.nome} onChange={e=>setEditandoCliente({...editandoCliente, nome:e.target.value})} />
+                                    <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" value={editandoCliente.departamento} onChange={e=>setEditandoCliente({...editandoCliente, departamento:e.target.value})} />
+                                    <input type="tel" className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" value={editandoCliente.whatsapp} onChange={e=>setEditandoCliente({...editandoCliente, whatsapp:e.target.value})} />
                                     <div className="flex space-x-3 pt-6">
                                         <button type="button" onClick={()=>setEditandoCliente(null)} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all">Cancelar</button>
-                                        <button className="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl shadow-indigo-500/20 active:scale-95 transition-all">Gravar</button>
+                                        <button className="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl active:scale-95 transition-all">Salvar</button>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     )}
 
-                    {/* MODAL PAGAMENTO */}
                     {modalPagamento.aberto && (
-                        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-xl">
-                            <div className="bg-tcard rounded-[50px] p-10 w-full max-w-sm border border-tborder shadow-2xl transition-all">
+                        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-xl transition-all">
+                            <div className="bg-tcard rounded-[50px] p-10 w-full max-w-sm border border-tborder shadow-2xl">
                                 <h3 className="text-3xl font-black text-tmain mb-1 text-center">Receber</h3>
-                                <p className="text-sm text-tmuted mb-10 text-center font-bold tracking-widest uppercase opacity-60">Total: R$ {modalPagamento.totalDevido.toFixed(2)}</p>
+                                <p className="text-sm text-tmuted mb-10 text-center font-bold tracking-widest uppercase opacity-60">Total: R$ {modalPagamento.totalDevido.toFixed(2).replace('.', ',')}</p>
                                 <form onSubmit={confirmarPagamento} className="space-y-6">
                                     <div className="relative">
                                         <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-tmuted text-xl">R$</span>
-                                        <input type="number" step="0.01" required className="w-full p-8 pl-14 rounded-[35px] bg-tinput text-tmain text-4xl font-black outline-none border border-tborder shadow-inner" value={valorPagamento} onChange={e=>setValorPagamento(e.target.value)} autoFocus />
+                                        <input type="number" step="0.01" required className="w-full p-8 pl-14 rounded-[35px] bg-tinput text-tmain text-4xl font-black outline-none border border-tborder shadow-inner transition-colors" value={valorPagamento} onChange={e=>setValorPagamento(e.target.value)} autoFocus />
                                     </div>
-                                    <button className="w-full bg-emerald-500 text-white p-8 rounded-[35px] font-black text-2xl shadow-2xl shadow-emerald-500/30 active:scale-95 transition-all">Baixar Dívida</button>
+                                    <button className="w-full bg-emerald-500 text-white p-8 rounded-[35px] font-black text-2xl shadow-2xl active:scale-95 transition-all">Baixar Dívida</button>
                                     <button type="button" onClick={()=>setModalPagamento({aberto:false})} className="w-full text-tmuted font-black py-2 uppercase text-xs tracking-widest opacity-40">Voltar</button>
                                 </form>
                             </div>
                         </div>
                     )}
 
-                    {/* MODAL CONFIRMAÇÃO */}
                     {modalConfirm.aberto && (
                         <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 backdrop-blur-md">
-                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-xs border border-tborder shadow-2xl text-center">
+                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-xs border border-tborder shadow-2xl text-center transition-colors">
                                 <div className="mx-auto bg-red-500/10 text-red-500 w-20 h-20 rounded-full flex items-center justify-center mb-6"><Icon name="alert-circle" className="w-10 h-10" /></div>
                                 <p className="font-black text-tmain mb-8 leading-tight text-xl">{modalConfirm.mensagem}</p>
                                 <div className="flex space-x-3">
                                     <button onClick={()=>setModalConfirm({aberto:false})} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase active:scale-95 transition-all">Não</button>
-                                    <button onClick={modalConfirm.onConfirm} className="flex-1 p-5 rounded-3xl bg-red-500 text-white font-black uppercase shadow-xl shadow-red-500/20 active:scale-95 transition-all">Sim</button>
+                                    <button onClick={modalConfirm.onConfirm} className="flex-1 p-5 rounded-3xl bg-red-500 text-white font-black uppercase shadow-xl active:scale-95 transition-all">Sim</button>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* TOASTS */}
                     {toast.aberto && (
-                        <div className={`fixed top-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-full shadow-2xl z-[100] text-white flex items-center font-black text-sm whitespace-nowrap border border-white/20 transition-all duration-500 ${toast.tipo==='erro'?'bg-red-500 translate-y-0':'bg-indigo-500 -translate-y-2 animate-bounce'}`}>
+                        <div className={`fixed top-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-full shadow-2xl z-[100] text-white flex items-center font-black text-sm border border-white/20 transition-all duration-500 ${toast.tipo==='erro'?'bg-red-500':'bg-indigo-500 translate-y-0'}`}>
                             <Icon name={toast.tipo==='erro'?'alert-circle':'check-circle-2'} className="w-5 h-5 mr-3" />
                             {toast.mensagem}
                         </div>
@@ -637,14 +628,12 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
 
-        // Logica de Registro PWA melhorada para o GitHub Pages
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                // Tenta descobrir o caminho base (necessário para o GitHub Pages subfolders)
                 const scope = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
                 navigator.serviceWorker.register('sw.js', { scope: scope })
-                    .then(function(reg) { console.log('SW registrado no escopo:', reg.scope); })
-                    .catch(function(err) { console.warn('SW falhou (ambiente local ou erro de path):', err); });
+                    .then(function(reg) { console.log('SW registrado:', reg.scope); })
+                    .catch(function(err) { console.warn('PWA desativado (local ou erro):', err); });
             });
         }
     </script>

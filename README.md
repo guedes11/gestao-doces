@@ -54,4 +54,3 @@ Este projeto foi desenvolvido integralmente pela **Gemini**, a inteligência art
 2.  **Backup:** Recomenda-se utilizar a função **"Salvar Backup"** nas configurações (ícone da engrenagem) pelo menos uma vez por semana. Guarde o arquivo gerado em um local seguro (Google Drive, E-mail ou WhatsApp).
 
 ---
-Desenvolvido com Gemini 🍬

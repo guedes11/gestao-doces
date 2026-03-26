@@ -76,7 +76,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        const APP_VERSION = "2.4.0"; 
+        const APP_VERSION = "2.5.0"; 
 
         const ICONS = {
             store: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>`,
@@ -145,6 +145,7 @@
             const [editandoDoce, setEditandoDoce] = useState(null);
             const [modalAjustes, setModalAjustes] = useState(false);
             const [clientesExpandidos, setClientesExpandidos] = useState([]);
+            const [caixaExpandidos, setCaixaExpandidos] = useState([]); 
             const [toast, setToast] = useState({ aberto: false, mensagem: '', tipo: 'success' });
             const [modalConfirm, setModalConfirm] = useState({ aberto: false, mensagem: '', onConfirm: null });
 
@@ -226,6 +227,10 @@
                 });
             };
 
+            const toggleExpandirCaixa = (id) => {
+                setCaixaExpandidos(prev => prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]);
+            };
+
             const adicionarDoce = (e) => {
                 e.preventDefault();
                 const p = parseFloat(novoDoce.preco.toString().replace(',', '.'));
@@ -298,7 +303,7 @@
 
                 const pid = gerarId();
                 setLogsPagamentos([...logsPagamentos, {
-                    id: pid, clienteNome: modalPagamento.clienteNome, valor: val,
+                    id: pid, clienteId: modalPagamento.clienteId, clienteNome: modalPagamento.clienteNome, valor: val,
                     data: new Date().toLocaleDateString('pt-BR'), hora: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}), timestamp: Date.now()
                 }]);
 
@@ -468,13 +473,61 @@
                                     <p className="text-emerald-100 text-[10px] font-bold uppercase tracking-widest">Total Arrecadado</p>
                                     <p className="text-4xl font-black tracking-tight transition-all">R$ {logsPagamentos.reduce((a,c)=>a+c.valor,0).toFixed(2).replace('.',',')}</p>
                                 </div>
+                                
                                 <div className="space-y-3">
-                                    {[...logsPagamentos].sort((a,b)=>b.timestamp-a.timestamp).map(l => (
-                                        <div key={l.id} className="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm transition-colors">
-                                            <div className="flex flex-col"><span className="font-bold text-tmain">{l.clienteNome}</span><span className="text-[10px] text-tmuted font-medium uppercase">{l.data} às {l.hora}</span></div>
-                                            <div className="flex items-center space-x-3"><span className="font-bold text-emerald-500 text-lg transition-all">+ R$ {l.valor.toFixed(2).replace('.', ',')}</span><button onClick={()=>removerLogPagamento(l.id)} className="text-red-500 p-1 active:scale-90 transition-transform"><Icon name="trash-2" className="w-4 h-4" /></button></div>
-                                        </div>
-                                    ))}
+                                    {(() => {
+                                        const agrupados = logsPagamentos.reduce((acc, log) => {
+                                            if (!acc[log.clienteId]) acc[log.clienteId] = { nome: log.clienteNome, total: 0, logs: [] };
+                                            acc[log.clienteId].total += log.valor;
+                                            acc[log.clienteId].logs.push(log);
+                                            return acc;
+                                        }, {});
+
+                                        const listaAgrupada = Object.entries(agrupados).sort((a,b) => a[1].nome.localeCompare(b[1].nome));
+
+                                        if (listaAgrupada.length === 0) {
+                                            return <div className="text-center text-tmuted p-6 bg-tcard rounded-xl border border-tborder">Nenhum pagamento registrado.</div>;
+                                        }
+
+                                        return listaAgrupada.map(([clienteId, dados]) => {
+                                            const exp = caixaExpandidos.includes(clienteId);
+                                            return (
+                                                <div key={clienteId} className="bg-tcard rounded-xl border border-tborder shadow-sm overflow-hidden transition-colors">
+                                                    <div className="p-4 flex justify-between items-center cursor-pointer active:bg-slate-500/5 transition-colors" onClick={() => toggleExpandirCaixa(clienteId)}>
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center">
+                                                                <h4 className="font-bold text-tmain mr-2 text-lg">{dados.nome}</h4>
+                                                                <Icon name={exp?'chevron-up':'chevron-down'} className={`w-4 h-4 ${exp?'text-emerald-500':'text-tmuted'}`} />
+                                                            </div>
+                                                            <p className="text-[10px] text-tmuted font-bold uppercase tracking-wide mt-1">
+                                                                {dados.logs.length} registro{dados.logs.length > 1 ? 's' : ''}
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex items-center">
+                                                            <span className="font-black text-emerald-500 text-lg">R$ {dados.total.toFixed(2).replace('.', ',')}</span>
+                                                        </div>
+                                                    </div>
+                                                    {exp && (
+                                                        <div className="bg-tinput p-4 border-t border-tborder space-y-2 transition-colors">
+                                                            {dados.logs.sort((a,b)=>b.timestamp-a.timestamp).map(l => (
+                                                                <div key={l.id} className="flex justify-between items-center text-sm border-b border-tborder/50 pb-2 last:border-b-0 last:pb-0">
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-[10px] text-tmuted font-bold uppercase">{l.data} às {l.hora}</span>
+                                                                    </div>
+                                                                    <div className="flex items-center space-x-3">
+                                                                        <span className="font-bold text-tmain">R$ {l.valor.toFixed(2).replace('.', ',')}</span>
+                                                                        <button onClick={(e)=>{e.stopPropagation(); removerLogPagamento(l.id);}} className="text-red-500 p-1 active:scale-90 transition-transform">
+                                                                            <Icon name="trash-2" className="w-4 h-4" />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        });
+                                    })()}
                                 </div>
                             </div>
                         )}
@@ -544,6 +597,7 @@
                         </div>
                     )}
 
+                    {/* EDIÇÃO DOCE */}
                     {editandoDoce && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
                             <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
@@ -568,6 +622,7 @@
                         </div>
                     )}
 
+                    {/* EDIÇÃO CLIENTE */}
                     {editandoCliente && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
                             <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
@@ -585,6 +640,7 @@
                         </div>
                     )}
 
+                    {/* MODAL PAGAMENTO */}
                     {modalPagamento.aberto && (
                         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-xl transition-all">
                             <div className="bg-tcard rounded-[50px] p-10 w-full max-w-sm border border-tborder shadow-2xl transition-all">
@@ -602,6 +658,7 @@
                         </div>
                     )}
 
+                    {/* MODAL CONFIRMAÇÃO */}
                     {modalConfirm.aberto && (
                         <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 backdrop-blur-md transition-all">
                             <div className="bg-tcard rounded-[40px] p-8 w-full max-w-xs border border-tborder shadow-2xl text-center transition-colors">
@@ -615,6 +672,7 @@
                         </div>
                     )}
 
+                    {/* TOASTS */}
                     {toast.aberto && (
                         <div className={`fixed top-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-full shadow-2xl z-[100] text-white flex items-center font-black text-sm border border-white/20 transition-all duration-500 ${toast.tipo==='erro'?'bg-red-500':'bg-indigo-500 translate-y-0'}`}>
                             <Icon name={toast.tipo==='erro'?'alert-circle':'check-circle-2'} className="w-5 h-5 mr-3" />
@@ -633,7 +691,7 @@
                 const scope = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
                 navigator.serviceWorker.register('sw.js', { scope: scope })
                     .then(function(reg) { console.log('SW registrado:', reg.scope); })
-                    .catch(function(err) { console.warn('PWA desativado:', err); });
+                    .catch(function(err) { console.warn('PWA desativado (local ou erro):', err); });
             });
         }
     </script>

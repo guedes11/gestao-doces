@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gestão de Doces</title>
     
-    <!-- Configurações PWA (Instalação no Telemóvel) -->
+    <!-- Configurações PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9.5 7.5-2 2a4.95 4.95 0 1 0 7 7l2-2a4.95 4.95 0 1 0-7-7Z'/%3E%3Cpath d='M14 6.5v10'/%3E%3Cpath d='M10 7.5v10'/%3E%3Cpath d='m16 7 1-5 1.36.68A3 3 0 0 0 19.7 3h.3v.3a3 3 0 0 0-.68 1.34L20 6l-4 1Z'/%3E%3Cpath d='m8 17-1 5-1.36-.68A3 3 0 0 0 4.3 21H4v-.3a3 3 0 0 0 .68-1.34L4 18l4-1Z'/%3E%3C/svg%3E">
 
+    <!-- Bibliotecas Externas -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Configuração do Tailwind para Temas Dinâmicos (Claro, Médio, Escuro) -->
     <style type="text/tailwindcss">
         @layer base {
             :root, .tema-claro {
@@ -72,35 +72,37 @@
         }
     </script>
 </head>
-<body class="font-sans selection:bg-indigo-500/30">
+<body>
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
+        const APP_VERSION = "2.2.0"; 
+
         const ICONS = {
-            store: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>`,
-            users: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
-            candy: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.5 7.5-2 2a4.95 4.95 0 1 0 7 7l2-2a4.95 4.95 0 1 0-7-7Z"/><path d="M14 6.5v10"/><path d="M10 7.5v10"/><path d="m16 7 1-5 1.36.68A3 3 0 0 0 19.7 3h.3v.3a3 3 0 0 0-.68 1.34L20 6l-4 1Z"/><path d="m8 17-1 5-1.36-.68A3 3 0 0 0 4.3 21H4v-.3a3 3 0 0 0 .68-1.34L4 18l4-1Z"/></svg>`,
-            history: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>`,
-            receipt: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17V7"/></svg>`,
-            'layout-dashboard': `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>`,
-            wallet: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>`,
-            'shopping-cart': `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`,
-            phone: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
-            'trash-2': `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`,
-            plus: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`,
-            x: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
-            'check-circle-2': `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`,
-            'edit-2': `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`,
-            download: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>`,
-            upload: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>`,
-            'alert-circle': `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>`,
-            'chevron-down': `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`,
-            'chevron-up': `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`,
-            database: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>`,
-            settings: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`,
-            sun: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`
+            store: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>`,
+            users: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+            candy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.5 7.5-2 2a4.95 4.95 0 1 0 7 7l2-2a4.95 4.95 0 1 0-7-7Z"/><path d="M14 6.5v10"/><path d="M10 7.5v10"/><path d="m16 7 1-5 1.36.68A3 3 0 0 0 19.7 3h.3v.3a3 3 0 0 0-.68 1.34L20 6l-4 1Z"/><path d="m8 17-1 5-1.36-.68A3 3 0 0 0 4.3 21H4v-.3a3 3 0 0 0 .68-1.34L4 18l4-1Z"/></svg>`,
+            history: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>`,
+            receipt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17V7"/></svg>`,
+            'layout-dashboard': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>`,
+            wallet: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>`,
+            'shopping-cart': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`,
+            phone: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+            'trash-2': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`,
+            plus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`,
+            x: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
+            'check-circle-2': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`,
+            'edit-2': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`,
+            download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>`,
+            upload: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>`,
+            'alert-circle': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>`,
+            'chevron-down': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`,
+            'chevron-up': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`,
+            settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`,
+            sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`,
+            database: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>`
         };
 
         const Icon = ({ name, className }) => (
@@ -110,25 +112,22 @@
         function App() {
             // Inicialização Segura
             const safeLoad = (key, defaultVal) => {
-                try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } 
-                catch (e) { return defaultVal; }
-            };
-            const safeLoadString = (key, defaultVal) => {
-                try { return localStorage.getItem(key) || defaultVal; } 
-                catch (e) { return defaultVal; }
+                try { 
+                    const item = localStorage.getItem(key);
+                    return item ? JSON.parse(item) : defaultVal; 
+                } catch (e) { return defaultVal; }
             };
 
-            const [tema, setTema] = useState(() => safeLoadString('g_doces_tema', 'claro'));
+            const [tema, setTema] = useState(() => localStorage.getItem('g_doces_tema') || 'claro');
             const [clientes, setClientes] = useState(() => safeLoad('g_doces_clientes', []));
             const [doces, setDoces] = useState(() => safeLoad('g_doces_produtos', []));
             const [vendas, setVendas] = useState(() => safeLoad('g_doces_vendas', []));
             const [pagamentos, setPagamentos] = useState(() => safeLoad('g_doces_pagamentos', []));
             const [logsPagamentos, setLogsPagamentos] = useState(() => safeLoad('g_doces_logs', []));
 
-            // Efeitos de Gravação e Atualização de Tema
+            // Efeitos de Gravação
             useEffect(() => {
-                document.documentElement.classList.remove('tema-claro', 'tema-medio', 'tema-escuro');
-                document.documentElement.classList.add(`tema-${tema}`);
+                document.documentElement.className = `tema-${tema}`;
                 localStorage.setItem('g_doces_tema', tema);
             }, [tema]);
 
@@ -138,6 +137,7 @@
             useEffect(() => { localStorage.setItem('g_doces_pagamentos', JSON.stringify(pagamentos)); }, [pagamentos]);
             useEffect(() => { localStorage.setItem('g_doces_logs', JSON.stringify(logsPagamentos)); }, [logsPagamentos]);
 
+            // Interface
             const [abaAtiva, setAbaAtiva] = useState('resumo'); 
             const [modalVenda, setModalVenda] = useState({ aberto: false, clienteId: null, clienteNome: '' });
             const [doceSelecionado, setDoceSelecionado] = useState('');
@@ -148,15 +148,13 @@
             
             const [editandoCliente, setEditandoCliente] = useState(null);
             const [editandoDoce, setEditandoDoce] = useState(null);
-            
             const [modalAjustes, setModalAjustes] = useState(false);
             const [clientesExpandidos, setClientesExpandidos] = useState([]);
-            
-            const [novoCliente, setNovoCliente] = useState({ nome: '', departamento: '', whatsapp: '' });
-            const [novoDoce, setNovoDoce] = useState({ nome: '', preco: '', estoque: '' });
-
             const [toast, setToast] = useState({ aberto: false, mensagem: '', tipo: 'success' });
             const [modalConfirm, setModalConfirm] = useState({ aberto: false, mensagem: '', onConfirm: null });
+
+            const [novoCliente, setNovoCliente] = useState({ nome: '', departamento: '', whatsapp: '' });
+            const [novoDoce, setNovoDoce] = useState({ nome: '', preco: '', estoque: '' });
 
             const fileInputRef = useRef(null);
 
@@ -165,7 +163,6 @@
                 setTimeout(() => setToast(t => ({ ...t, aberto: false })), 3000);
             };
 
-            // Exportar / Importar
             const exportarDados = () => {
                 const dados = { clientes, doces, vendas, pagamentos, logsPagamentos };
                 const blob = new Blob([JSON.stringify(dados)], { type: 'application/json' });
@@ -176,8 +173,7 @@
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                mostrarToast("Backup exportado com sucesso!", "success");
+                mostrarToast("Backup exportado!", "success");
             };
 
             const importarDados = (event) => {
@@ -187,315 +183,224 @@
                 reader.onload = (e) => {
                     try {
                         const dados = JSON.parse(e.target.result);
-                        if (dados.clientes && dados.doces) {
-                            setModalConfirm({
-                                aberto: true,
-                                mensagem: "Atenção: Isto irá substituir os dados atuais. Deseja continuar?",
-                                onConfirm: () => {
-                                    setClientes(dados.clientes || []);
-                                    setDoces(dados.doces || []);
-                                    setVendas(dados.vendas || []);
-                                    setPagamentos(dados.pagamentos || []);
-                                    setLogsPagamentos(dados.logsPagamentos || []);
-                                    mostrarToast("Dados restaurados com sucesso!", "success");
-                                    setModalConfirm({ aberto: false, mensagem: '', onConfirm: null });
-                                }
-                            });
-                        } else { mostrarToast("Ficheiro inválido.", "erro"); }
-                    } catch (error) { mostrarToast("Erro ao ler o ficheiro.", "erro"); }
+                        setModalConfirm({
+                            mensagem: "Restaurar backup substituirá os dados atuais. Confirmar?",
+                            onConfirm: () => {
+                                setClientes(dados.clientes || []);
+                                setDoces(dados.doces || []);
+                                setVendas(dados.vendas || []);
+                                setPagamentos(dados.pagamentos || []);
+                                setLogsPagamentos(dados.logsPagamentos || []);
+                                setModalConfirm({ aberto: false });
+                                mostrarToast("Backup restaurado!", "success");
+                            },
+                            aberto: true
+                        });
+                    } catch (err) { mostrarToast("Erro ao ler ficheiro.", "erro"); }
                 };
                 reader.readAsText(file);
-                event.target.value = ''; 
             };
 
-            const gerarId = () => Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
+            const gerarId = () => Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
 
-            // Lógica Clientes
+            // Operações
             const adicionarCliente = (e) => {
                 e.preventDefault();
-                if (!novoCliente.nome || !novoCliente.departamento) return;
                 setClientes([...clientes, { ...novoCliente, id: gerarId() }]);
                 setNovoCliente({ nome: '', departamento: '', whatsapp: '' });
-                mostrarToast("Cliente adicionado!", "success");
+                mostrarToast("Cliente salvo!");
             };
 
             const atualizarCliente = (e) => {
                 e.preventDefault();
                 setClientes(clientes.map(c => c.id === editandoCliente.id ? editandoCliente : c));
                 setEditandoCliente(null);
-                mostrarToast("Cliente atualizado!", "success");
+                mostrarToast("Cliente atualizado!");
             };
 
             const removerCliente = (id) => {
                 setModalConfirm({
-                    aberto: true,
-                    mensagem: "Apagar cliente e todo o seu histórico de dívidas?",
+                    mensagem: "Eliminar cliente e as suas dívidas permanentemente?",
                     onConfirm: () => {
-                        setClientes(prev => prev.filter(c => c.id !== id));
-                        setVendas(prev => prev.filter(v => v.clienteId !== id));
-                        setPagamentos(prev => prev.filter(p => p.clienteId !== id));
-                        setModalConfirm({ aberto: false, mensagem: '', onConfirm: null });
-                        mostrarToast("Cliente apagado.", "success");
-                    }
+                        setClientes(clientes.filter(c => c.id !== id));
+                        setVendas(vendas.filter(v => v.clienteId !== id));
+                        setPagamentos(pagamentos.filter(p => p.clienteId !== id));
+                        setModalConfirm({ aberto: false });
+                        mostrarToast("Cliente removido.");
+                    },
+                    aberto: true
                 });
             };
 
-            const toggleExpandirCliente = (id) => {
-                setClientesExpandidos(prev => prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]);
-            };
-
-            // Lógica Doces/Estoque
             const adicionarDoce = (e) => {
                 e.preventDefault();
-                if (!novoDoce.nome || !novoDoce.preco || !novoDoce.estoque) return;
-                const precoF = parseFloat(novoDoce.preco.toString().replace(',', '.'));
-                const estqF = parseInt(novoDoce.estoque, 10);
-                if (isNaN(precoF) || isNaN(estqF)) return;
-                setDoces([...doces, { id: gerarId(), nome: novoDoce.nome, preco: precoF, estoque: estqF }]);
+                const p = parseFloat(novoDoce.preco.toString().replace(',', '.'));
+                const s = parseInt(novoDoce.estoque, 10);
+                if (isNaN(p) || isNaN(s)) return;
+                setDoces([...doces, { id: gerarId(), nome: novoDoce.nome, preco: p, estoque: s }]);
                 setNovoDoce({ nome: '', preco: '', estoque: '' });
-                mostrarToast("Produto adicionado!", "success");
+                mostrarToast("Produto salvo!");
             };
 
             const atualizarDoce = (e) => {
                 e.preventDefault();
-                const precoF = parseFloat(editandoDoce.preco.toString().replace(',', '.'));
-                const estqF = parseInt(editandoDoce.estoque, 10);
-                if (isNaN(precoF) || isNaN(estqF)) {
-                    mostrarToast("Valores inválidos.", "erro");
-                    return;
-                }
-                setDoces(doces.map(d => d.id === editandoDoce.id ? { ...editandoDoce, preco: precoF, estoque: estqF } : d));
+                const p = parseFloat(editandoDoce.preco.toString().replace(',', '.'));
+                const s = parseInt(editandoDoce.estoque, 10);
+                setDoces(doces.map(d => d.id === editandoDoce.id ? { ...editandoDoce, preco: p, estoque: s } : d));
                 setEditandoDoce(null);
-                mostrarToast("Produto atualizado!", "success");
+                mostrarToast("Produto atualizado!");
             };
 
             const removerDoce = (id) => {
                 setModalConfirm({
-                    aberto: true,
-                    mensagem: "Deseja apagar este produto do estoque?",
+                    mensagem: "Remover este produto do estoque?",
                     onConfirm: () => {
-                        setDoces(prev => prev.filter(d => d.id !== id));
-                        setModalConfirm({ aberto: false, mensagem: '', onConfirm: null });
-                        mostrarToast("Produto apagado.", "success");
-                    }
+                        setDoces(doces.filter(d => d.id !== id));
+                        setModalConfirm({ aberto: false });
+                        mostrarToast("Produto removido.");
+                    },
+                    aberto: true
                 });
-            };
-
-            // Lógica Vendas
-            const abrirModalVenda = (clienteId, clienteNome) => {
-                setModalVenda({ aberto: true, clienteId, clienteNome });
-                setDoceSelecionado('');
-                setQuantidadeVenda(1);
-                setErroVenda('');
             };
 
             const registrarVenda = (e) => {
                 e.preventDefault();
-                setErroVenda('');
                 const doce = doces.find(d => d.id === doceSelecionado);
                 const qtd = parseInt(quantidadeVenda, 10);
+                if (!doce || doce.estoque < qtd) { setErroVenda("Estoque insuficiente."); return; }
 
-                if (!doce) return;
-                if (isNaN(qtd) || qtd <= 0) { setErroVenda("Quantidade inválida."); return; }
-                if (doce.estoque < qtd) { setErroVenda(`Apenas ${doce.estoque} unidades disponíveis.`); return; }
-                
                 setDoces(doces.map(d => d.id === doce.id ? { ...d, estoque: d.estoque - qtd } : d));
                 setVendas([...vendas, {
-                    id: gerarId(), 
-                    clienteId: modalVenda.clienteId, 
-                    doceId: doce.id, 
-                    doceNome: qtd > 1 ? `${qtd}x ${doce.nome}` : doce.nome, 
-                    preco: doce.preco * qtd,
-                    data: new Date().toLocaleDateString('pt-BR'), 
-                    timestamp: Date.now() 
+                    id: gerarId(), clienteId: modalVenda.clienteId, doceId: doce.id,
+                    doceNome: qtd > 1 ? `${qtd}x ${doce.nome}` : doce.nome,
+                    preco: doce.preco * qtd, data: new Date().toLocaleDateString('pt-BR'), timestamp: Date.now()
                 }]);
-                
-                setModalVenda({ aberto: false, clienteId: null, clienteNome: '' });
+                setModalVenda({ aberto: false });
                 setDoceSelecionado('');
                 setQuantidadeVenda(1);
-                if (!clientesExpandidos.includes(modalVenda.clienteId)) setClientesExpandidos([...clientesExpandidos, modalVenda.clienteId]);
-                mostrarToast("Venda registada!", "success");
+                mostrarToast("Venda realizada!");
             };
 
-            const removerVenda = (vendaId, doceId) => {
+            const removerVenda = (vId, dId, nome) => {
                 setModalConfirm({
-                    aberto: true,
-                    mensagem: "Cancelar venda e repor a quantidade no estoque?",
+                    mensagem: "Cancelar esta venda e devolver ao estoque?",
                     onConfirm: () => {
-                        const vendaCancelada = vendas.find(v => v.id === vendaId);
-                        if (vendaCancelada && doceId && doceId !== 'pagamento') {
-                            let qtdRepor = 1;
-                            const match = vendaCancelada.doceNome.match(/^(\d+)x\s/);
-                            if (match) qtdRepor = parseInt(match[1], 10);
-                            setDoces(prev => prev.map(d => d.id === doceId ? { ...d, estoque: d.estoque + qtdRepor } : d));
-                        }
-                        setVendas(prev => prev.filter(v => v.id !== vendaId));
-                        setModalConfirm({ aberto: false, mensagem: '', onConfirm: null });
-                        mostrarToast("Venda cancelada.", "success");
-                    }
+                        let qtd = 1;
+                        const match = nome.match(/^(\d+)x/);
+                        if(match) qtd = parseInt(match[1], 10);
+                        setDoces(doces.map(d => d.id === dId ? { ...d, estoque: d.estoque + qtd } : d));
+                        setVendas(vendas.filter(v => v.id !== vId));
+                        setModalConfirm({ aberto: false });
+                        mostrarToast("Venda cancelada.");
+                    },
+                    aberto: true
                 });
             };
 
-            // Lógica Pagamentos
             const confirmarPagamento = (e) => {
                 e.preventDefault();
-                const valorF = parseFloat(valorPagamento.toString().replace(',', '.'));
-                if (isNaN(valorF) || valorF <= 0) return;
+                const val = parseFloat(valorPagamento.toString().replace(',', '.'));
+                if (isNaN(val) || val <= 0) return;
 
                 const pid = gerarId();
-
                 setLogsPagamentos([...logsPagamentos, {
-                    id: pid, clienteId: modalPagamento.clienteId, clienteNome: modalPagamento.clienteNome, valor: valorF,
-                    data: new Date().toLocaleDateString('pt-BR'), hora: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}), timestamp: Date.now()
+                    id: pid, clienteNome: modalPagamento.clienteNome, valor: val,
+                    data: new Date().toLocaleDateString('pt-BR'), hora: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}), timestamp: Date.now()
                 }]);
 
-                if (valorF >= modalPagamento.totalDevido - 0.01) {
+                if (val >= modalPagamento.totalDevido - 0.01) {
                     setVendas(vendas.filter(v => v.clienteId !== modalPagamento.clienteId));
                     setPagamentos(pagamentos.filter(p => p.clienteId !== modalPagamento.clienteId));
                 } else {
-                    setPagamentos([...pagamentos, {
-                        id: pid, clienteId: modalPagamento.clienteId, valor: valorF, data: new Date().toLocaleDateString('pt-BR'), timestamp: Date.now()
-                    }]);
+                    setPagamentos([...pagamentos, { id: pid, clienteId: modalPagamento.clienteId, valor: val, data: new Date().toLocaleDateString('pt-BR'), timestamp: Date.now() }]);
                 }
-                setModalPagamento({ aberto: false, clienteId: null, clienteNome: '', totalDevido: 0 });
+                setModalPagamento({ aberto: false });
                 setValorPagamento('');
-                mostrarToast("Pagamento recebido!", "success");
+                mostrarToast("Recebimento registrado!");
             };
 
-            const removerLogPagamento = (logId) => {
+            const removerLogPagamento = (id) => {
                 setModalConfirm({
-                    aberto: true,
-                    mensagem: "Apagar registo do caixa e desfazer o pagamento na conta do cliente?",
+                    mensagem: "Remover este registro? (Isso desfará o pagamento na conta do cliente)",
                     onConfirm: () => {
-                        const logToUndo = logsPagamentos.find(l => l.id === logId);
-                        setLogsPagamentos(prev => prev.filter(l => l.id !== logId));
-                        if (logToUndo) {
-                            setPagamentos(prev => {
-                                if (prev.some(p => p.id === logId)) return prev.filter(p => p.id !== logId);
-                                const pIndex = prev.findIndex(p => p.clienteId === logToUndo.clienteId && p.valor === logToUndo.valor && p.data === logToUndo.data);
-                                if (pIndex !== -1) {
-                                    const newP = [...prev];
-                                    newP.splice(pIndex, 1);
-                                    return newP;
-                                }
-                                return prev;
-                            });
-                        }
-                        setModalConfirm({ aberto: false, mensagem: '', onConfirm: null });
-                        mostrarToast("Pagamento desfeito e apagado.", "success");
-                    }
+                        const log = logsPagamentos.find(l => l.id === id);
+                        setLogsPagamentos(logsPagamentos.filter(l => l.id !== id));
+                        setPagamentos(pagamentos.filter(p => p.id !== id));
+                        setModalConfirm({ aberto: false });
+                        mostrarToast("Registro removido.");
+                    },
+                    aberto: true
                 });
             };
 
-            const abrirWhatsapp = (e, numero) => {
-                e.stopPropagation();
-                let numLimpo = numero.replace(/\D/g, ''); 
-                if (numLimpo.length <= 11) numLimpo = '55' + numLimpo;
-                window.open(`https://wa.me/${numLimpo}`, '_blank');
-            };
-
             return (
-                <div className="min-h-screen relative pb-24">
-                    <header className="bg-tcard pt-10 pb-5 px-6 border-b border-tborder sticky top-0 z-10 shadow-sm flex justify-center items-center transition-colors duration-300">
+                <div className="min-h-screen relative pb-24 transition-colors duration-300">
+                    <header className="bg-tcard pt-10 pb-5 px-6 border-b border-tborder sticky top-0 z-10 shadow-sm flex justify-center items-center">
                         <h1 className="text-xl font-extrabold text-indigo-500 uppercase tracking-widest text-center">Gestão de Doces</h1>
-                        <button onClick={() => setModalAjustes(true)} className="absolute right-6 p-2.5 bg-slate-500/10 rounded-full text-tmuted hover:text-indigo-500 hover:bg-indigo-500/10 transition-colors focus:outline-none">
-                            <Icon name="settings" className="w-[18px] h-[18px]" />
+                        <button onClick={() => setModalAjustes(true)} className="absolute right-6 p-2 bg-slate-500/10 rounded-full text-tmuted">
+                            <Icon name="settings" className="w-5 h-5" />
                         </button>
                     </header>
 
                     <main className="p-6 max-w-md mx-auto">
                         
-                        {/* ABA: RESUMO */}
                         {abaAtiva === 'resumo' && (
                             <div className="space-y-6">
                                 {(() => {
-                                    const totalAReceber = clientes.reduce((total, cliente) => {
-                                        const compras = vendas.filter(v => v.clienteId === cliente.id).reduce((sum, v) => sum + v.preco, 0);
-                                        const pags = pagamentos.filter(p => p.clienteId === cliente.id).reduce((sum, p) => sum + p.valor, 0);
-                                        const saldo = compras - pags;
-                                        return total + (saldo > 0 ? saldo : 0);
+                                    const total = clientes.reduce((acc, c) => {
+                                        const v = vendas.filter(v => v.clienteId === c.id).reduce((s, v) => s + v.preco, 0);
+                                        const p = pagamentos.filter(p => p.clienteId === c.id).reduce((s, p) => s + p.valor, 0);
+                                        return acc + Math.max(0, v - p);
                                     }, 0);
-
                                     return (
                                         <div className="bg-red-500/10 p-5 rounded-2xl border border-red-500/20 flex justify-between items-center shadow-sm">
-                                            <div>
-                                                <p className="text-[11px] font-bold text-red-500 uppercase tracking-wider mb-1">Saldo a Receber</p>
-                                                <p className="text-2xl font-black text-red-500">R$ {totalAReceber.toFixed(2).replace('.', ',')}</p>
-                                            </div>
-                                            <div className="p-3 bg-tcard rounded-full shadow-sm">
-                                                <Icon name="wallet" className="w-6 h-6 text-red-500" />
-                                            </div>
+                                            <div><p className="text-[11px] font-bold text-red-500 uppercase tracking-wider mb-1">Saldo a Receber</p><p className="text-2xl font-black text-red-500">R$ {total.toFixed(2).replace('.', ',')}</p></div>
+                                            <div className="p-3 bg-tcard rounded-full shadow-sm text-red-500"><Icon name="wallet" className="w-6 h-6" /></div>
                                         </div>
                                     );
                                 })()}
                                 <div>
-                                    <h3 className="text-sm font-bold text-tmain uppercase tracking-wider mb-4 px-1 flex items-center transition-colors duration-300">
+                                    <h3 className="text-sm font-bold text-tmain uppercase tracking-wider mb-4 px-1 flex items-center transition-colors">
                                         <Icon name="users" className="w-4 h-4 mr-2 text-indigo-500"/> Contas de Clientes
                                     </h3>
-                                    {clientes.length === 0 ? (
-                                        <div className="bg-tcard p-6 rounded-xl border border-tborder text-center text-sm text-tmuted font-medium transition-colors duration-300">Nenhum cliente cadastrado.</div>
-                                    ) : (
+                                    {clientes.length === 0 ? <div className="text-center text-tmuted p-6 bg-tcard rounded-xl border border-tborder">Nenhum cliente salvo.</div> : (
                                         <div className="space-y-3">
-                                            {[...clientes].sort((a, b) => a.nome.localeCompare(b.nome)).map(cliente => {
-                                                const comprasDoCliente = vendas.filter(v => v.clienteId === cliente.id).sort((a, b) => b.timestamp - a.timestamp);
-                                                const pagamentosDoCliente = pagamentos.filter(p => p.clienteId === cliente.id).sort((a, b) => b.timestamp - a.timestamp);
-                                                const saldoDevido = comprasDoCliente.reduce((acc, curr) => acc + curr.preco, 0) - pagamentosDoCliente.reduce((acc, curr) => acc + curr.valor, 0);
-                                                const estaExpandido = clientesExpandidos.includes(cliente.id);
+                                            {[...clientes].sort((a,b)=>a.nome.localeCompare(b.nome)).map(c => {
+                                                const vens = vendas.filter(v => v.clienteId === c.id);
+                                                const pags = pagamentos.filter(p => p.clienteId === c.id);
+                                                const saldo = vens.reduce((s,v)=>s+v.preco,0) - pags.reduce((s,p)=>s+p.valor,0);
+                                                const exp = clientesExpandidos.includes(c.id);
 
                                                 return (
-                                                    <div key={cliente.id} className="bg-tcard rounded-xl border border-tborder shadow-sm transition-all duration-300 overflow-hidden hover:border-indigo-500/30">
-                                                        <div className="p-4 flex justify-between items-center cursor-pointer active:bg-slate-500/10 transition-colors" onClick={() => toggleExpandirCliente(cliente.id)}>
+                                                    <div key={c.id} className="bg-tcard rounded-xl border border-tborder shadow-sm overflow-hidden transition-colors">
+                                                        <div className="p-4 flex justify-between items-center cursor-pointer active:bg-slate-500/5" onClick={() => setClientesExpandidos(exp ? clientesExpandidos.filter(id=>id!==c.id) : [...clientesExpandidos, c.id])}>
                                                             <div className="flex-1">
-                                                                <div className="flex items-center">
-                                                                    <h4 className="font-bold text-tmain mr-2 text-lg transition-colors duration-300">{cliente.nome}</h4>
-                                                                    <Icon name={estaExpandido ? 'chevron-up' : 'chevron-down'} className={`w-[18px] h-[18px] ${estaExpandido ? 'text-indigo-500' : 'text-tmuted'} transition-colors duration-300`} />
-                                                                </div>
-                                                                <div className="flex items-center space-x-3 mt-1.5">
-                                                                    <span className="inline-block bg-slate-500/10 text-tmuted text-xs px-2 py-0.5 rounded font-medium border border-tborder transition-colors duration-300">{cliente.departamento}</span>
-                                                                    {!estaExpandido && saldoDevido > 0 && <span className="text-xs font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded flex items-center border border-red-500/20">R$ {saldoDevido.toFixed(2).replace('.', ',')}</span>}
-                                                                </div>
+                                                                <div className="flex items-center"><h4 className="font-bold text-tmain mr-2 text-lg">{c.nome}</h4><Icon name={exp?'chevron-up':'chevron-down'} className={`w-4 h-4 ${exp?'text-indigo-500':'text-tmuted'}`} /></div>
+                                                                <div className="flex items-center space-x-2 mt-1"><span className="bg-slate-500/10 text-tmuted text-[10px] px-2 py-0.5 rounded font-bold uppercase">{c.departamento}</span>{!exp && saldo > 0.01 && <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded">R$ {saldo.toFixed(2)}</span>}</div>
                                                             </div>
-                                                            <div className="flex items-center space-x-2">
-                                                                {cliente.whatsapp && (
-                                                                    <button type="button" onClick={(e) => abrirWhatsapp(e, cliente.whatsapp)} className="text-emerald-500 p-2 rounded-lg hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/20 transition-colors focus:outline-none">
-                                                                        <Icon name="phone" className="w-5 h-5" />
-                                                                    </button>
-                                                                )}
-                                                                {estaExpandido && (
-                                                                    <button type="button" onClick={(e) => { e.stopPropagation(); abrirModalVenda(cliente.id, cliente.nome); }} className="bg-indigo-500/10 text-indigo-500 p-2.5 rounded-lg hover:bg-indigo-500/20 flex items-center active:scale-95 border border-indigo-500/20 transition-colors">
-                                                                        <Icon name="shopping-cart" className="w-5 h-5 mr-1" /><span className="text-xs font-bold">Vender</span>
-                                                                    </button>
-                                                                )}
+                                                            <div className="flex items-center space-x-1">
+                                                                {c.whatsapp && <button onClick={(e)=>{e.stopPropagation(); window.open(`https://wa.me/55${c.whatsapp.replace(/\D/g,'')}`)}} className="p-2 text-emerald-500"><Icon name="phone" className="w-5 h-5" /></button>}
+                                                                {exp && <button onClick={(e)=>{e.stopPropagation(); setModalVenda({aberto:true, clienteId:c.id, clienteNome:c.nome}); setErroVenda('');}} className="bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center shadow-lg shadow-indigo-500/20 active:scale-95"><Icon name="shopping-cart" className="w-4 h-4 mr-1" /> Vender</button>}
                                                             </div>
                                                         </div>
-                                                        {estaExpandido && (
-                                                            <div className="bg-tinput p-4 border-t border-tborder transition-colors duration-300">
-                                                                {comprasDoCliente.length > 0 ? (
-                                                                    <div className="space-y-4">
-                                                                        <div className="space-y-1">
-                                                                            {comprasDoCliente.map(compra => (
-                                                                                <div key={compra.id} className="flex justify-between items-center text-sm border-b border-tborder pb-2 pt-2 last:border-0 last:pb-0 group transition-colors duration-300">
-                                                                                    <div className="flex flex-col flex-1"><span className="text-tmain font-semibold">{compra.doceNome}</span><span className="text-tmuted text-[11px]">{compra.data}</span></div>
-                                                                                    <div className="flex items-center space-x-3"><span className="font-bold text-tmain">R$ {compra.preco.toFixed(2).replace('.', ',')}</span><button onClick={() => removerVenda(compra.id, compra.doceId)} className="p-1.5 text-tmuted hover:text-white hover:bg-red-500 rounded transition-colors active:scale-95 md:opacity-0 md:group-hover:opacity-100"><Icon name="trash-2" className="w-4 h-4" /></button></div>
+                                                        {exp && (
+                                                            <div className="bg-tinput p-4 border-t border-tborder space-y-4 transition-colors">
+                                                                {vens.length > 0 ? (
+                                                                    <>
+                                                                        <div className="space-y-2">
+                                                                            {vens.map(v => (
+                                                                                <div key={v.id} className="flex justify-between items-center text-sm border-b border-tborder/50 pb-2">
+                                                                                    <div className="flex flex-col"><span className="font-semibold text-tmain">{v.doceNome}</span><span className="text-[10px] text-tmuted">{v.data}</span></div>
+                                                                                    <div className="flex items-center space-x-2"><span className="font-bold text-tmain">R$ {v.preco.toFixed(2)}</span><button onClick={()=>removerVenda(v.id, v.doceId, v.doceNome)} className="text-red-500 p-1"><Icon name="x" className="w-4 h-4" /></button></div>
                                                                                 </div>
                                                                             ))}
                                                                         </div>
-                                                                        {pagamentosDoCliente.length > 0 && (
-                                                                            <div className="bg-tcard p-3 rounded-lg border border-indigo-500/20 shadow-sm mt-2 transition-colors duration-300">
-                                                                                <h6 className="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-2 flex items-center"><Icon name="receipt" className="w-[14px] h-[14px] mr-1" /> Pagamentos Parciais</h6>
-                                                                                <div className="space-y-1.5">
-                                                                                {pagamentosDoCliente.map(pag => (
-                                                                                    <div key={pag.id} className="flex justify-between text-xs"><span className="text-tmuted font-medium">{pag.data}</span><span className="font-bold text-emerald-500">- R$ {pag.valor.toFixed(2).replace('.', ',')}</span></div>
-                                                                                ))}
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        <div className="flex justify-between items-end pt-4 mt-2 border-t border-tborder transition-colors duration-300">
-                                                                            <div className="flex flex-col"><span className="text-sm font-semibold text-tmain mt-1 uppercase tracking-wide">Pendente: <span className="text-red-500 text-lg font-black ml-1">R$ {saldoDevido.toFixed(2).replace('.', ',')}</span></span></div>
-                                                                            {saldoDevido > 0 && <button onClick={() => { setModalPagamento({ aberto: true, clienteId: cliente.id, clienteNome: cliente.nome, totalDevido: saldoDevido }); setValorPagamento(saldoDevido.toFixed(2)); }} className="flex items-center space-x-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all"><Icon name="wallet" className="w-[18px] h-[18px]" /><span>Receber</span></button>}
+                                                                        <div className="flex justify-between items-end pt-2 border-t border-tborder">
+                                                                            <div><p className="text-[10px] text-tmuted uppercase font-bold">Pendente</p><p className="text-xl font-black text-red-500">R$ {saldo.toFixed(2).replace('.',',')}</p></div>
+                                                                            {saldo > 0.01 && <button onClick={()=> {setModalPagamento({aberto:true, clienteId:c.id, clienteNome:c.nome, totalDevido:saldo}); setValorPagamento(saldo.toFixed(2));}} className="bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all">Receber</button>}
                                                                         </div>
-                                                                    </div>
-                                                                ) : <p className="text-sm text-tmuted text-center py-3 font-medium transition-colors duration-300">Sem dívidas ativas.</p>}
+                                                                    </>
+                                                                ) : <p className="text-xs text-tmuted text-center">Nenhuma dívida ativa.</p>}
                                                             </div>
                                                         )}
                                                     </div>
@@ -507,69 +412,74 @@
                             </div>
                         )}
 
-                        {/* ABA: CLIENTES */}
                         {abaAtiva === 'clientes' && (
                             <div className="space-y-6">
-                                <div className="bg-tcard p-6 rounded-2xl shadow-sm border border-tborder transition-colors duration-300">
-                                    <h2 className="text-lg font-bold text-tmain mb-4 flex items-center border-b border-tborder pb-3 transition-colors duration-300"><Icon name="users" className="w-5 h-5 mr-2 text-indigo-500" /> Novo Cliente</h2>
+                                <div className="bg-tcard p-6 rounded-2xl border border-tborder shadow-sm">
+                                    <h2 className="text-lg font-bold text-tmain mb-4 flex items-center border-b border-tborder pb-2"><Icon name="users" className="w-5 h-5 mr-2 text-indigo-500" /> Novo Cliente</h2>
                                     <form onSubmit={adicionarCliente} className="space-y-4">
-                                        <input type="text" placeholder="Nome *" required className="w-full p-3.5 rounded-xl bg-tinput border border-tborder focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium text-tmain transition-colors duration-300" value={novoCliente.nome} onChange={e => setNovoCliente({...novoCliente, nome: e.target.value})} />
-                                        <input type="text" placeholder="Departamento *" required className="w-full p-3.5 rounded-xl bg-tinput border border-tborder focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium text-tmain transition-colors duration-300" value={novoCliente.departamento} onChange={e => setNovoCliente({...novoCliente, departamento: e.target.value})} />
-                                        <input type="tel" placeholder="WhatsApp (opcional)" className="w-full p-3.5 rounded-xl bg-tinput border border-tborder focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium text-tmain transition-colors duration-300" value={novoCliente.whatsapp} onChange={e => setNovoCliente({...novoCliente, whatsapp: e.target.value})} />
-                                        <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3.5 rounded-xl font-bold text-sm flex justify-center items-center shadow-md active:scale-95 transition-all"><Icon name="plus" className="w-[18px] h-[18px] mr-2" /> Gravar Cliente</button>
+                                        <input type="text" placeholder="Nome *" required className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder" value={novoCliente.nome} onChange={e=>setNovoCliente({...novoCliente, nome:e.target.value})} />
+                                        <input type="text" placeholder="Departamento *" required className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder" value={novoCliente.departamento} onChange={e=>setNovoCliente({...novoCliente, departamento:e.target.value})} />
+                                        <input type="tel" placeholder="WhatsApp" className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder" value={novoCliente.whatsapp} onChange={e=>setNovoCliente({...novoCliente, whatsapp:e.target.value})} />
+                                        <button className="w-full bg-indigo-500 text-white p-3.5 rounded-xl font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">Salvar Cliente</button>
                                     </form>
                                 </div>
-                                <ul className="space-y-3">
-                                    {clientes.map(cliente => (
-                                        <li key={cliente.id} className="bg-tcard p-4 rounded-xl border border-tborder shadow-sm flex justify-between items-center hover:border-indigo-500/30 transition-colors duration-300">
-                                            <div><p className="font-bold text-tmain text-base transition-colors duration-300">{cliente.nome}</p><p className="text-xs text-tmuted font-medium uppercase mt-0.5 transition-colors duration-300">{cliente.departamento}</p></div>
-                                            <div className="flex space-x-2"><button onClick={() => setEditandoCliente({ ...cliente })} className="p-2.5 text-tmuted hover:text-indigo-500 hover:bg-indigo-500/10 rounded-lg transition-colors"><Icon name="edit-2" className="w-[18px] h-[18px]" /></button><button onClick={() => removerCliente(cliente.id)} className="p-2.5 text-tmuted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><Icon name="trash-2" className="w-[18px] h-[18px]" /></button></div>
-                                        </li>
+                                <div className="space-y-3">
+                                    {clientes.map(c => (
+                                        <div key={c.id} className="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm">
+                                            <div><p className="font-bold text-tmain">{c.nome}</p><p className="text-[10px] text-tmuted uppercase">{c.departamento}</p></div>
+                                            <div className="flex space-x-1">
+                                                <button onClick={()=>setEditandoCliente({...c})} className="p-2 text-indigo-500 active:scale-90 transition-transform"><Icon name="edit-2" className="w-5 h-5" /></button>
+                                                <button onClick={()=>removerCliente(c.id)} className="p-2 text-red-500 active:scale-90 transition-transform"><Icon name="trash-2" className="w-5 h-5" /></button>
+                                            </div>
+                                        </div>
                                     ))}
-                                </ul>
+                                </div>
                             </div>
                         )}
 
-                        {/* ABA: DOCES */}
                         {abaAtiva === 'doces' && (
                             <div className="space-y-6">
-                                <div className="bg-tcard p-6 rounded-2xl shadow-sm border border-tborder transition-colors duration-300">
-                                    <h2 className="text-lg font-bold text-tmain mb-4 flex items-center border-b border-tborder pb-3 transition-colors duration-300"><Icon name="candy" className="w-5 h-5 mr-2 text-indigo-500" /> Novo Produto</h2>
+                                <div className="bg-tcard p-6 rounded-2xl border border-tborder shadow-sm">
+                                    <h2 className="text-lg font-bold text-tmain mb-4 flex items-center border-b border-tborder pb-2"><Icon name="candy" className="w-5 h-5 mr-2 text-indigo-500" /> Novo Produto</h2>
                                     <form onSubmit={adicionarDoce} className="space-y-4">
-                                        <input type="text" placeholder="Nome *" required className="w-full p-3.5 rounded-xl bg-tinput border border-tborder focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium text-tmain transition-colors duration-300" value={novoDoce.nome} onChange={e => setNovoDoce({...novoDoce, nome: e.target.value})} />
+                                        <input type="text" placeholder="Nome *" required className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder" value={novoDoce.nome} onChange={e=>setNovoDoce({...novoDoce, nome:e.target.value})} />
                                         <div className="flex space-x-4">
-                                            <input type="number" step="0.01" placeholder="Preço *" required className="w-1/2 p-3.5 rounded-xl bg-tinput border border-tborder focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium text-tmain transition-colors duration-300" value={novoDoce.preco} onChange={e => setNovoDoce({...novoDoce, preco: e.target.value})} />
-                                            <input type="number" placeholder="Estoque *" required className="w-1/2 p-3.5 rounded-xl bg-tinput border border-tborder focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium text-tmain transition-colors duration-300" value={novoDoce.estoque} onChange={e => setNovoDoce({...novoDoce, estoque: e.target.value})} />
+                                            <input type="number" step="0.01" placeholder="Preço *" required className="w-1/2 p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder" value={novoDoce.preco} onChange={e=>setNovoDoce({...novoDoce, preco:e.target.value})} />
+                                            <input type="number" placeholder="Estoque *" required className="w-1/2 p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder" value={novoDoce.estoque} onChange={e=>setNovoDoce({...novoDoce, estoque:e.target.value})} />
                                         </div>
-                                        <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3.5 rounded-xl font-bold text-sm flex justify-center items-center shadow-md active:scale-95 transition-all"><Icon name="plus" className="w-[18px] h-[18px] mr-2" /> Gravar Produto</button>
+                                        <button className="w-full bg-indigo-500 text-white p-3.5 rounded-xl font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">Salvar Produto</button>
                                     </form>
                                 </div>
-                                <ul className="space-y-3">
-                                    {doces.map(doce => (
-                                        <li key={doce.id} className="bg-tcard p-4 rounded-xl border border-tborder shadow-sm flex justify-between items-center hover:border-indigo-500/30 transition-colors duration-300">
-                                            <div className="flex items-center space-x-4"><div className={`p-3 rounded-xl ${doce.estoque > 0 ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20' : 'bg-slate-500/10 text-tmuted border border-tborder'}`}><Icon name="candy" className="w-6 h-6" /></div><div><p className={`font-bold text-base transition-colors duration-300 ${doce.estoque > 0 ? 'text-tmain' : 'text-tmuted line-through'}`}>{doce.nome}</p><div className="flex items-center space-x-3 mt-1"><span className="text-sm font-bold text-tmain transition-colors duration-300">R$ {doce.preco.toFixed(2).replace('.', ',')}</span><span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${doce.estoque > 0 ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' : 'text-red-500 bg-red-500/10 border-red-500/20'}`}>{doce.estoque > 0 ? `${doce.estoque} un.` : 'Esgotado'}</span></div></div></div>
-                                            <div className="flex space-x-2"><button onClick={() => setEditandoDoce({ ...doce, preco: (doce.preco || 0).toString(), estoque: (doce.estoque || 0).toString() })} className="p-2.5 text-tmuted hover:text-indigo-500 hover:bg-indigo-500/10 rounded-lg transition-colors"><Icon name="edit-2" className="w-[18px] h-[18px]" /></button><button onClick={() => removerDoce(doce.id)} className="p-2.5 text-tmuted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><Icon name="trash-2" className="w-[18px] h-[18px]" /></button></div>
-                                        </li>
+                                <div className="space-y-3">
+                                    {doces.map(d => (
+                                        <div key={d.id} className="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm">
+                                            <div className="flex items-center space-x-3">
+                                                <div className={`p-2 rounded-lg ${d.estoque>0?'bg-indigo-500/10 text-indigo-500':'bg-slate-500/10 text-tmuted'}`}><Icon name="candy" className="w-5 h-5" /></div>
+                                                <div><p className={`font-bold transition-colors ${d.estoque>0?'text-tmain':'text-tmuted line-through'}`}>{d.nome}</p><p className="text-xs text-tmuted font-bold">R$ {d.preco.toFixed(2)} | {d.estoque} un.</p></div>
+                                            </div>
+                                            <div className="flex space-x-1">
+                                                <button onClick={()=>setEditandoDoce({...d, preco: d.preco.toString(), estoque: d.estoque.toString()})} className="p-2 text-indigo-500 active:scale-90 transition-transform"><Icon name="edit-2" className="w-5 h-5" /></button>
+                                                <button onClick={()=>removerDoce(d.id)} className="p-2 text-red-500 active:scale-90 transition-transform"><Icon name="trash-2" className="w-5 h-5" /></button>
+                                            </div>
+                                        </div>
                                     ))}
-                                </ul>
+                                </div>
                             </div>
                         )}
 
-                        {/* ABA: CAIXA */}
                         {abaAtiva === 'caixa' && (
                             <div className="space-y-6">
                                 <div className="bg-gradient-to-br from-emerald-600 to-teal-800 p-8 rounded-2xl shadow-lg text-white text-center relative overflow-hidden">
-                                    <div className="absolute -left-6 -bottom-6 w-32 h-32 bg-white rounded-full opacity-10 blur-2xl"></div>
-                                    <Icon name="history" className="w-8 h-8 mx-auto mb-3 text-emerald-100" />
-                                    <p className="text-emerald-100 text-sm font-bold uppercase tracking-widest mb-1">Total Arrecadado</p>
-                                    <p className="text-4xl font-black tracking-tight">R$ {logsPagamentos.reduce((a,c)=>a+c.valor,0).toFixed(2).replace('.',',')}</p>
+                                    <div className="absolute -left-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                                    <Icon name="history" className="w-10 h-10 mx-auto mb-2" />
+                                    <p className="text-emerald-100 text-[10px] font-bold uppercase tracking-widest">Total Arrecadado</p>
+                                    <p className="text-4xl font-black">R$ {logsPagamentos.reduce((a,c)=>a+c.valor,0).toFixed(2).replace('.',',')}</p>
                                 </div>
-                                
                                 <div className="space-y-3">
-                                    {[...logsPagamentos].sort((a, b) => b.timestamp - a.timestamp).map(log => (
-                                        <div key={log.id} className="bg-tcard p-4 rounded-xl border border-tborder shadow-sm flex justify-between items-center transition-colors duration-300">
-                                            <div className="flex flex-col"><span className="font-bold text-tmain text-base transition-colors duration-300">{log.clienteNome}</span><span className="text-[11px] text-tmuted font-medium transition-colors duration-300">{log.data} às {log.hora || '--:--'}</span></div>
-                                            <div className="flex items-center space-x-3"><span className="font-bold text-emerald-500 text-lg">+ R$ {log.valor.toFixed(2).replace('.', ',')}</span><button onClick={() => removerLogPagamento(log.id)} className="p-1.5 text-tmuted hover:text-white hover:bg-red-500 rounded transition-colors"><Icon name="trash-2" className="w-4 h-4" /></button></div>
+                                    {[...logsPagamentos].sort((a,b)=>b.timestamp-a.timestamp).map(l => (
+                                        <div key={l.id} className="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm">
+                                            <div className="flex flex-col"><span className="font-bold text-tmain">{l.clienteNome}</span><span className="text-[10px] text-tmuted">{l.data} às {l.hora}</span></div>
+                                            <div className="flex items-center space-x-3"><span className="font-bold text-emerald-500 text-lg">+ R$ {l.valor.toFixed(2)}</span><button onClick={()=>removerLogPagamento(l.id)} className="text-red-500 p-1 active:scale-90 transition-transform"><Icon name="trash-2" className="w-4 h-4" /></button></div>
                                         </div>
                                     ))}
                                 </div>
@@ -577,166 +487,147 @@
                         )}
                     </main>
 
-                    {/* MENU INFERIOR */}
-                    <nav className="fixed bottom-0 left-0 right-0 bg-tcard border-t border-tborder pb-safe z-20 shadow-lg transition-colors duration-300">
-                        <div className="max-w-md mx-auto flex justify-around items-center p-2">
-                            <button onClick={() => setAbaAtiva('resumo')} className={`flex flex-col items-center p-2 transition-colors ${abaAtiva === 'resumo' ? 'text-indigo-500' : 'text-tmuted hover:text-tmain'}`}><Icon name="layout-dashboard" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase">Vendas</span></button>
-                            <button onClick={() => setAbaAtiva('clientes')} className={`flex flex-col items-center p-2 transition-colors ${abaAtiva === 'clientes' ? 'text-indigo-500' : 'text-tmuted hover:text-tmain'}`}><Icon name="users" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase">Clientes</span></button>
-                            <button onClick={() => setAbaAtiva('doces')} className={`flex flex-col items-center p-2 transition-colors ${abaAtiva === 'doces' ? 'text-indigo-500' : 'text-tmuted hover:text-tmain'}`}><Icon name="candy" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase">Estoque</span></button>
-                            <button onClick={() => setAbaAtiva('caixa')} className={`flex flex-col items-center p-2 transition-colors ${abaAtiva === 'caixa' ? 'text-emerald-500' : 'text-tmuted hover:text-tmain'}`}><Icon name="wallet" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase">Caixa</span></button>
-                        </div>
+                    {/* NAVEGAÇÃO INFERIOR */}
+                    <nav className="fixed bottom-0 left-0 right-0 bg-tcard border-t border-tborder pb-safe z-20 shadow-lg flex justify-around p-2 transition-colors">
+                        <button onClick={()=>setAbaAtiva('resumo')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='resumo'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="layout-dashboard" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase">Vendas</span></button>
+                        <button onClick={()=>setAbaAtiva('clientes')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='clientes'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="users" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase">Clientes</span></button>
+                        <button onClick={()=>setAbaAtiva('doces')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='doces'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="candy" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase">Estoque</span></button>
+                        <button onClick={()=>setAbaAtiva('caixa')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='caixa'?'text-emerald-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="wallet" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase">Caixa</span></button>
                     </nav>
 
-                    {/* MODAIS */}
-                    {modalVenda.aberto && (
-                        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-                            <div className="bg-tcard rounded-2xl p-6 w-full max-w-sm border border-tborder shadow-2xl transition-colors duration-300">
-                                <div className="flex justify-between items-center mb-5 border-b border-tborder pb-4">
-                                    <h3 className="text-xl font-bold flex items-center text-tmain"><Icon name="shopping-cart" className="w-5 h-5 mr-2 text-indigo-500" /> Nova Venda</h3>
-                                    <button onClick={() => setModalVenda({ aberto: false, clienteId: null, clienteNome: '' })} className="text-tmuted bg-slate-500/10 hover:bg-slate-500/20 p-1.5 rounded-full focus:outline-none"><Icon name="x" className="w-5 h-5" /></button>
+                    {/* MODAL CONFIGURAÇÕES */}
+                    {modalAjustes && (
+                        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
+                            <div className="bg-tcard rounded-3xl p-6 w-full max-w-sm border border-tborder shadow-2xl scale-in-center">
+                                <div className="flex justify-between items-center mb-6 border-b border-tborder pb-4">
+                                    <h3 className="text-lg font-bold text-tmain flex items-center"><Icon name="settings" className="w-5 h-5 mr-2 text-indigo-500" /> Configurações</h3>
+                                    <button onClick={()=>setModalAjustes(false)} className="text-tmuted bg-slate-500/10 p-2 rounded-full active:scale-90 transition-all"><Icon name="x" className="w-5 h-5" /></button>
                                 </div>
-                                <form onSubmit={registrarVenda} className="space-y-5">
-                                    <p className="text-sm font-medium text-tmuted">Cliente: <strong className="text-tmain">{modalVenda.clienteNome}</strong></p>
-                                    
-                                    <div className="flex space-x-4">
-                                        <div className="flex-1">
-                                            <label className="block text-xs font-bold text-tmuted uppercase tracking-wider mb-2">Produto</label>
-                                            <select className="w-full p-3.5 rounded-xl bg-tinput border border-tborder focus:outline-none focus:ring-2 focus:ring-indigo-500 text-tmain font-medium text-sm transition-colors duration-300" value={doceSelecionado} onChange={(e) => { setDoceSelecionado(e.target.value); setErroVenda(''); }} required>
-                                                <option value="" disabled>Escolher doce...</option>
-                                                {doces.map(d => <option key={d.id} value={d.id} disabled={d.estoque <= 0}>{d.nome} - R$ {d.preco.toFixed(2)}</option>)}
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="text-[10px] font-black text-tmuted uppercase mb-3 block tracking-widest text-center">Tema Visual</label>
+                                        <div className="flex bg-tinput p-1.5 rounded-2xl border border-tborder">
+                                            {['claro','medio','escuro'].map(t=>(
+                                                <button key={t} onClick={()=>setTema(t)} className={`flex-1 py-3 rounded-xl text-xs font-black capitalize transition-all ${tema===t?'bg-tcard text-indigo-500 shadow-xl shadow-indigo-500/10 border border-tborder':'text-tmuted hover:text-tmain'}`}>{t}</button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="border-t border-tborder pt-6 space-y-3">
+                                        <button onClick={exportarDados} className="w-full flex items-center justify-center p-4 bg-indigo-500/10 text-indigo-500 font-black text-sm rounded-2xl border border-indigo-500/20 active:scale-95 transition-all shadow-lg shadow-indigo-500/5"><Icon name="download" className="w-4 h-4 mr-2" /> Salvar Backup</button>
+                                        <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={e=>{importarDados(e); setModalAjustes(false);}} />
+                                        <button onClick={()=>fileInputRef.current.click()} className="w-full flex items-center justify-center p-4 bg-slate-500/10 text-tmuted font-black text-sm rounded-2xl border border-tborder active:scale-95 transition-all"><Icon name="upload" className="w-4 h-4 mr-2" /> Restaurar Backup</button>
+                                    </div>
+                                    <p className="text-[10px] text-tmuted text-center font-bold tracking-widest">VERSÃO {APP_VERSION}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* MODAL VENDA */}
+                    {modalVenda.aberto && (
+                        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl">
+                                <div className="flex justify-between items-center mb-8"><h3 className="text-2xl font-black text-tmain">Nova Venda</h3><button onClick={()=>setModalVenda({aberto:false})} className="p-2 text-tmuted bg-slate-500/10 rounded-full"><Icon name="x" className="w-6 h-6" /></button></div>
+                                <form onSubmit={registrarVenda} className="space-y-6">
+                                    <p className="text-sm font-bold text-tmuted uppercase tracking-widest text-center">Cliente: <span className="text-indigo-500 font-black">{modalVenda.clienteNome}</span></p>
+                                    <div className="flex space-x-3">
+                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center">Doce</label>
+                                            <select required className="w-full p-5 rounded-3xl bg-tinput text-tmain outline-none font-bold text-sm border border-tborder" value={doceSelecionado} onChange={e=>{setDoceSelecionado(e.target.value); setErroVenda('');}}>
+                                                <option value="" disabled>Escolher...</option>
+                                                {doces.map(d=><option key={d.id} value={d.id} disabled={d.estoque<=0}>{d.nome} (R$ {d.preco.toFixed(2)})</option>)}
                                             </select>
                                         </div>
-                                        <div className="w-24">
-                                            <label className="block text-xs font-bold text-tmuted uppercase tracking-wider mb-2">Qtd</label>
-                                            <input type="number" min="1" value={quantidadeVenda} onChange={(e) => { setQuantidadeVenda(e.target.value); setErroVenda(''); }} className="w-full p-3.5 rounded-xl bg-tinput border border-tborder focus:outline-none focus:ring-2 focus:ring-indigo-500 text-tmain font-medium text-sm transition-colors duration-300 text-center" required />
+                                        <div className="w-24"><label className="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center">Qtd</label>
+                                            <input type="number" min="1" required className="w-full p-5 rounded-3xl bg-tinput text-tmain text-center font-black border border-tborder" value={quantidadeVenda} onChange={e=>{setQuantidadeVenda(e.target.value); setErroVenda('');}} />
                                         </div>
                                     </div>
-
-                                    {erroVenda && <p className="text-red-500 text-sm font-bold bg-red-500/10 p-3 rounded-lg border border-red-500/20">{erroVenda}</p>}
-
-                                    <button type="submit" className="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold mt-2">Confirmar Venda</button>
+                                    {erroVenda && <p className="text-xs text-red-500 font-black bg-red-500/10 p-4 rounded-2xl border border-red-500/20 text-center">{erroVenda}</p>}
+                                    <button className="w-full bg-indigo-500 text-white p-6 rounded-[30px] font-black text-xl shadow-2xl shadow-indigo-500/30 active:scale-95 transition-all">Confirmar</button>
                                 </form>
                             </div>
                         </div>
                     )}
 
-                    {modalPagamento.aberto && (
-                        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-                            <div className="bg-tcard rounded-2xl p-6 w-full max-w-sm border-t-8 border-emerald-500 shadow-2xl transition-colors duration-300">
-                                <div className="flex justify-between mb-2">
-                                    <div className="bg-emerald-500/10 text-emerald-500 w-14 h-14 rounded-full flex items-center justify-center mb-4 border border-emerald-500/20"><Icon name="check-circle-2" className="w-[28px] h-[28px]" /></div>
-                                    <button onClick={() => setModalPagamento({ aberto: false, clienteId: null, clienteNome: '', totalDevido: 0 })} className="text-tmuted bg-slate-500/10 hover:bg-slate-500/20 p-1.5 rounded-full focus:outline-none"><Icon name="x" className="w-5 h-5" /></button>
-                                </div>
-                                <h3 className="text-xl font-black mb-1 text-tmain">Receber Pagamento</h3>
-                                <p className="text-sm text-tmuted mb-5">Pendente: <strong className="text-red-500">R$ {modalPagamento.totalDevido.toFixed(2)}</strong></p>
-                                <form onSubmit={confirmarPagamento}>
-                                    <input type="number" step="0.01" max={modalPagamento.totalDevido} required className="w-full p-3.5 text-2xl font-black rounded-lg bg-tinput border border-tborder mb-4 text-tmain focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors duration-300" value={valorPagamento} onChange={(e) => setValorPagamento(e.target.value)} />
-                                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white p-4 rounded-xl font-bold text-lg transition-colors">Confirmar</button>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {editandoCliente && (
-                        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-                            <div className="bg-tcard rounded-2xl p-6 w-full max-w-sm border border-tborder shadow-2xl transition-colors duration-300">
-                                <div className="flex justify-between items-center mb-5 border-b border-tborder pb-4">
-                                    <h3 className="text-lg font-bold flex items-center text-tmain"><Icon name="edit-2" className="w-5 h-5 mr-2 text-indigo-500"/> Editar Cliente</h3>
-                                    <button onClick={() => setEditandoCliente(null)} className="text-tmuted bg-slate-500/10 hover:bg-slate-500/20 p-1.5 rounded-full focus:outline-none"><Icon name="x" className="w-5 h-5" /></button>
-                                </div>
-                                <form onSubmit={atualizarCliente} className="space-y-4">
-                                    <input type="text" required className="w-full p-3.5 rounded-xl bg-tinput border border-tborder text-tmain text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-300" value={editandoCliente.nome || ''} onChange={e => setEditandoCliente({...editandoCliente, nome: e.target.value})} />
-                                    <input type="text" required className="w-full p-3.5 rounded-xl bg-tinput border border-tborder text-tmain text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-300" value={editandoCliente.departamento || ''} onChange={e => setEditandoCliente({...editandoCliente, departamento: e.target.value})} />
-                                    <input type="tel" className="w-full p-3.5 rounded-xl bg-tinput border border-tborder text-tmain text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-300" value={editandoCliente.whatsapp || ''} onChange={e => setEditandoCliente({...editandoCliente, whatsapp: e.target.value})} />
-                                    <button type="submit" className="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold text-sm mt-2">Salvar</button>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
+                    {/* EDIÇÃO DOCE */}
                     {editandoDoce && (
-                        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-                            <div className="bg-tcard rounded-2xl p-6 w-full max-w-sm border border-tborder shadow-2xl transition-colors duration-300">
-                                <div className="flex justify-between items-center mb-5 border-b border-tborder pb-4">
-                                    <h3 className="text-lg font-bold flex items-center text-tmain"><Icon name="edit-2" className="w-5 h-5 mr-2 text-indigo-500" /> Editar Produto</h3>
-                                    <button onClick={() => setEditandoDoce(null)} className="text-tmuted bg-slate-500/10 hover:bg-slate-500/20 p-1.5 rounded-full focus:outline-none"><Icon name="x" className="w-5 h-5" /></button>
-                                </div>
+                        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl">
+                                <h3 className="text-2xl font-black text-tmain mb-8 text-center uppercase tracking-tighter">Editar Produto</h3>
                                 <form onSubmit={atualizarDoce} className="space-y-4">
-                                    <input type="text" required className="w-full p-3.5 rounded-xl bg-tinput border border-tborder text-tmain text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-300" value={editandoDoce.nome || ''} onChange={e => setEditandoDoce({...editandoDoce, nome: e.target.value})} />
-                                    <div className="flex space-x-4">
-                                        <input type="number" step="0.01" required className="w-1/2 p-3.5 rounded-xl bg-tinput border border-tborder text-tmain text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-300" value={editandoDoce.preco || ''} onChange={e => setEditandoDoce({...editandoDoce, preco: e.target.value})} />
-                                        <input type="number" required className="w-1/2 p-3.5 rounded-xl bg-tinput border border-tborder text-tmain text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-300" value={editandoDoce.estoque || ''} onChange={e => setEditandoDoce({...editandoDoce, estoque: e.target.value})} />
+                                    <label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest">Nome do Produto</label>
+                                    <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoDoce.nome} onChange={e=>setEditandoDoce({...editandoDoce, nome:e.target.value})} />
+                                    <div className="flex space-x-3">
+                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest">Preço R$</label>
+                                            <input type="number" step="0.01" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoDoce.preco} onChange={e=>setEditandoDoce({...editandoDoce, preco:e.target.value})} />
+                                        </div>
+                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest">Estoque</label>
+                                            <input type="number" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoDoce.estoque} onChange={e=>setEditandoDoce({...editandoDoce, estoque:e.target.value})} />
+                                        </div>
                                     </div>
-                                    <button type="submit" className="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold text-sm mt-2">Salvar</button>
+                                    <div className="flex space-x-3 pt-6">
+                                        <button type="button" onClick={()=>setEditandoDoce(null)} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all">Cancelar</button>
+                                        <button className="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl shadow-indigo-500/20 active:scale-95 transition-all">Gravar</button>
+                                    </div>
                                 </form>
                             </div>
                         </div>
                     )}
 
-                    {modalAjustes && (
-                        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-                            <div className="bg-tcard rounded-2xl p-6 w-full max-w-sm border border-tborder shadow-2xl transition-colors duration-300">
-                                <div className="flex justify-between items-center mb-5 border-b border-tborder pb-4">
-                                    <h3 className="text-lg font-bold flex items-center text-tmain"><Icon name="settings" className="w-5 h-5 mr-2 text-indigo-500" /> Configurações</h3>
-                                    <button onClick={() => setModalAjustes(false)} className="text-tmuted bg-slate-500/10 hover:bg-slate-500/20 p-1.5 rounded-full focus:outline-none"><Icon name="x" className="w-5 h-5" /></button>
-                                </div>
-                                
-                                <div className="space-y-6">
-                                    {/* Seção Tema */}
-                                    <div>
-                                        <h3 className="text-sm font-bold text-tmain uppercase tracking-wider mb-3 flex items-center transition-colors duration-300">
-                                            <Icon name="sun" className="w-4 h-4 mr-2 text-amber-500"/> Tema Visual
-                                        </h3>
-                                        <div className="flex bg-tinput p-1 rounded-xl border border-tborder transition-colors duration-300">
-                                            <button onClick={() => setTema('claro')} className={`flex-1 flex justify-center items-center py-2.5 rounded-lg text-sm font-bold transition-all ${tema === 'claro' ? 'bg-tcard text-indigo-600 shadow-sm border border-tborder' : 'text-tmuted hover:text-tmain'}`}>Claro</button>
-                                            <button onClick={() => setTema('medio')} className={`flex-1 flex justify-center items-center py-2.5 rounded-lg text-sm font-bold transition-all ${tema === 'medio' ? 'bg-tcard text-indigo-400 shadow-sm border border-tborder' : 'text-tmuted hover:text-tmain'}`}>Médio</button>
-                                            <button onClick={() => setTema('escuro')} className={`flex-1 flex justify-center items-center py-2.5 rounded-lg text-sm font-bold transition-all ${tema === 'escuro' ? 'bg-tcard text-indigo-400 shadow-sm border border-tborder' : 'text-tmuted hover:text-tmain'}`}>Escuro</button>
-                                        </div>
+                    {/* EDIÇÃO CLIENTE */}
+                    {editandoCliente && (
+                        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl">
+                                <h3 className="text-2xl font-black text-tmain mb-8 text-center uppercase tracking-tighter">Editar Cliente</h3>
+                                <form onSubmit={atualizarCliente} className="space-y-4">
+                                    <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoCliente.nome} onChange={e=>setEditandoCliente({...editandoCliente, nome:e.target.value})} />
+                                    <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoCliente.departamento} onChange={e=>setEditandoCliente({...editandoCliente, departamento:e.target.value})} />
+                                    <input type="tel" className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoCliente.whatsapp} onChange={e=>setEditandoCliente({...editandoCliente, whatsapp:e.target.value})} />
+                                    <div className="flex space-x-3 pt-6">
+                                        <button type="button" onClick={()=>setEditandoCliente(null)} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all">Cancelar</button>
+                                        <button className="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl shadow-indigo-500/20 active:scale-95 transition-all">Gravar</button>
                                     </div>
-
-                                    {/* Seção Backup */}
-                                    <div className="border-t border-tborder pt-6 space-y-4 transition-colors duration-300">
-                                        <h3 className="text-sm font-bold text-tmain uppercase tracking-wider mb-2 flex items-center transition-colors duration-300">
-                                            <Icon name="database" className="w-4 h-4 mr-2 text-indigo-500"/> Backup dos Dados
-                                        </h3>
-                                        <p className="text-sm text-tmuted font-medium mb-4 transition-colors duration-300">
-                                            O aplicativo funciona offline. <strong>Exporte regularmente</strong> para não perder dados ao limpar o histórico do navegador.
-                                        </p>
-                                        <button onClick={exportarDados} className="w-full bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 p-4 rounded-xl font-bold text-sm flex justify-center items-center transition-colors border border-indigo-500/20 active:scale-95 shadow-sm">
-                                            <Icon name="download" className="w-5 h-5 mr-2" /> Salvar Backup (Exportar)
-                                        </button>
-                                        <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={(e) => { importarDados(e); setModalAjustes(false); }} />
-                                        <button onClick={() => fileInputRef.current.click()} className="w-full bg-slate-500/10 hover:bg-slate-500/20 text-tmain p-4 rounded-xl font-bold text-sm flex justify-center items-center transition-colors border border-tborder active:scale-95 shadow-sm">
-                                            <Icon name="upload" className="w-5 h-5 mr-2" /> Restaurar Backup (Importar)
-                                        </button>
-                                    </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
                     )}
 
-                    {/* MODAL CONFIRMAÇÃO GENÉRICA (Substitui o window.confirm) */}
+                    {/* MODAL PAGAMENTO */}
+                    {modalPagamento.aberto && (
+                        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-xl">
+                            <div className="bg-tcard rounded-[50px] p-10 w-full max-w-sm border border-tborder shadow-2xl transition-all">
+                                <h3 className="text-3xl font-black text-tmain mb-1 text-center">Receber</h3>
+                                <p className="text-sm text-tmuted mb-10 text-center font-bold tracking-widest uppercase opacity-60">Total: R$ {modalPagamento.totalDevido.toFixed(2)}</p>
+                                <form onSubmit={confirmarPagamento} className="space-y-6">
+                                    <div className="relative">
+                                        <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-tmuted text-xl">R$</span>
+                                        <input type="number" step="0.01" required className="w-full p-8 pl-14 rounded-[35px] bg-tinput text-tmain text-4xl font-black outline-none border border-tborder shadow-inner" value={valorPagamento} onChange={e=>setValorPagamento(e.target.value)} autoFocus />
+                                    </div>
+                                    <button className="w-full bg-emerald-500 text-white p-8 rounded-[35px] font-black text-2xl shadow-2xl shadow-emerald-500/30 active:scale-95 transition-all">Baixar Dívida</button>
+                                    <button type="button" onClick={()=>setModalPagamento({aberto:false})} className="w-full text-tmuted font-black py-2 uppercase text-xs tracking-widest opacity-40">Voltar</button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* MODAL CONFIRMAÇÃO */}
                     {modalConfirm.aberto && (
-                        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
-                            <div className="bg-tcard rounded-2xl p-6 w-full max-w-sm border border-tborder shadow-2xl transition-colors duration-300">
-                                <div className="mx-auto bg-red-500/10 text-red-500 w-14 h-14 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
-                                    <Icon name="alert-circle" className="w-[28px] h-[28px]" />
-                                </div>
-                                <h3 className="text-xl font-bold text-center text-tmain mb-2">Atenção</h3>
-                                <p className="text-sm text-center text-tmuted mb-6">{modalConfirm.mensagem}</p>
+                        <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 backdrop-blur-md">
+                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-xs border border-tborder shadow-2xl text-center">
+                                <div className="mx-auto bg-red-500/10 text-red-500 w-20 h-20 rounded-full flex items-center justify-center mb-6"><Icon name="alert-circle" className="w-10 h-10" /></div>
+                                <p className="font-black text-tmain mb-8 leading-tight text-xl">{modalConfirm.mensagem}</p>
                                 <div className="flex space-x-3">
-                                    <button onClick={() => setModalConfirm({ aberto: false, mensagem: '', onConfirm: null })} className="flex-1 bg-slate-500/10 hover:bg-slate-500/20 text-tmain p-3.5 rounded-xl font-bold transition-colors">Cancelar</button>
-                                    <button onClick={modalConfirm.onConfirm} className="flex-1 bg-red-500 hover:bg-red-600 text-white p-3.5 rounded-xl font-bold transition-colors shadow-md">Confirmar</button>
+                                    <button onClick={()=>setModalConfirm({aberto:false})} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase active:scale-95 transition-all">Não</button>
+                                    <button onClick={modalConfirm.onConfirm} className="flex-1 p-5 rounded-3xl bg-red-500 text-white font-black uppercase shadow-xl shadow-red-500/20 active:scale-95 transition-all">Sim</button>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* TOAST NOTIFICAÇÃO */}
+                    {/* TOASTS */}
                     {toast.aberto && (
-                        <div className={`fixed top-4 right-4 px-4 py-3 rounded-xl shadow-lg z-[100] text-white flex items-center transition-all duration-300 ${toast.tipo === 'erro' ? 'bg-red-500' : 'bg-emerald-500'}`}>
-                            <Icon name={toast.tipo === 'erro' ? 'alert-circle' : 'check-circle-2'} className="w-5 h-5 mr-2" />
-                            <span className="font-medium text-sm">{toast.mensagem}</span>
+                        <div className={`fixed top-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-full shadow-2xl z-[100] text-white flex items-center font-black text-sm whitespace-nowrap border border-white/20 transition-all duration-500 ${toast.tipo==='erro'?'bg-red-500 translate-y-0':'bg-indigo-500 -translate-y-2 animate-bounce'}`}>
+                            <Icon name={toast.tipo==='erro'?'alert-circle':'check-circle-2'} className="w-5 h-5 mr-3" />
+                            {toast.mensagem}
                         </div>
                     )}
                 </div>
@@ -746,12 +637,14 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
 
-        // Registrar Service Worker para ativar a PWA (evita erro em ambientes de preview locais)
-        if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('PWA Service Worker registado!', reg.scope))
-                    .catch(err => console.warn('Aviso do PWA (normal fora do ar):', err.message));
+        // Logica de Registro PWA melhorada para o GitHub Pages
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Tenta descobrir o caminho base (necessário para o GitHub Pages subfolders)
+                const scope = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+                navigator.serviceWorker.register('sw.js', { scope: scope })
+                    .then(function(reg) { console.log('SW registrado no escopo:', reg.scope); })
+                    .catch(function(err) { console.warn('SW falhou (ambiente local ou erro de path):', err); });
             });
         }
     </script>

@@ -1,24 +1,31 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gestão de Doces</title>
+    
+    <!-- Bibliotecas essenciais: React, ReactDOM, Babel (para ler o código) e Tailwind (para o design) -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
         body { padding-bottom: 80px; -webkit-tap-highlight-color: transparent; }
         ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-900 selection:bg-indigo-100">
+    
+    <!-- Onde a aplicação vai ser desenhada -->
     <div id="root"></div>
 
+    <!-- O Código da Aplicação -->
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
+        // Ícones embutidos para não depender de pacotes complexos e garantir que carregam offline
         const ICONS = {
             store: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>`,
             users: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
@@ -46,12 +53,19 @@
         );
 
         function App() {
-            const [clientes, setClientes] = useState(() => { try { return JSON.parse(localStorage.getItem('g_doces_clientes')) || []; } catch(e){ return []; } });
-            const [doces, setDoces] = useState(() => { try { return JSON.parse(localStorage.getItem('g_doces_produtos')) || []; } catch(e){ return []; } });
-            const [vendas, setVendas] = useState(() => { try { return JSON.parse(localStorage.getItem('g_doces_vendas')) || []; } catch(e){ return []; } });
-            const [pagamentos, setPagamentos] = useState(() => { try { return JSON.parse(localStorage.getItem('g_doces_pagamentos')) || []; } catch(e){ return []; } });
-            const [logsPagamentos, setLogsPagamentos] = useState(() => { try { return JSON.parse(localStorage.getItem('g_doces_logs')) || []; } catch(e){ return []; } });
+            // Inicialização do LocalStorage de forma segura
+            const safeLoad = (key) => {
+                try { return JSON.parse(localStorage.getItem(key)) || []; } 
+                catch (e) { return []; }
+            };
 
+            const [clientes, setClientes] = useState(() => safeLoad('g_doces_clientes'));
+            const [doces, setDoces] = useState(() => safeLoad('g_doces_produtos'));
+            const [vendas, setVendas] = useState(() => safeLoad('g_doces_vendas'));
+            const [pagamentos, setPagamentos] = useState(() => safeLoad('g_doces_pagamentos'));
+            const [logsPagamentos, setLogsPagamentos] = useState(() => safeLoad('g_doces_logs'));
+
+            // Efeitos para gravar automaticamente ao modificar
             useEffect(() => { localStorage.setItem('g_doces_clientes', JSON.stringify(clientes)); }, [clientes]);
             useEffect(() => { localStorage.setItem('g_doces_produtos', JSON.stringify(doces)); }, [doces]);
             useEffect(() => { localStorage.setItem('g_doces_vendas', JSON.stringify(vendas)); }, [vendas]);
@@ -73,13 +87,14 @@
 
             const fileInputRef = useRef(null);
 
+            // Exportar / Importar
             const exportarDados = () => {
                 const dados = { clientes, doces, vendas, pagamentos, logsPagamentos };
                 const blob = new Blob([JSON.stringify(dados)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `backup_doces_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
+                a.download = `backup_doces_${new Date().toLocaleDateString('pt-PT').replace(/\//g, '-')}.json`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -111,6 +126,7 @@
 
             const gerarId = () => Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
 
+            // Lógica Clientes
             const adicionarCliente = (e) => {
                 e.preventDefault();
                 if (!novoCliente.nome || !novoCliente.departamento) return;
@@ -136,6 +152,7 @@
                 setClientesExpandidos(prev => prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]);
             };
 
+            // Lógica Doces/Estoque
             const adicionarDoce = (e) => {
                 e.preventDefault();
                 if (!novoDoce.nome || !novoDoce.preco || !novoDoce.estoque) return;
@@ -159,6 +176,7 @@
                 if (window.confirm('Deseja apagar este produto do estoque?')) setDoces(doces.filter(d => d.id !== id));
             };
 
+            // Lógica Vendas
             const registrarVenda = (e) => {
                 e.preventDefault();
                 setErroVenda('');
@@ -167,7 +185,7 @@
                 setDoces(doces.map(d => d.id === doce.id ? { ...d, estoque: d.estoque - 1 } : d));
                 setVendas([...vendas, {
                     id: gerarId(), clienteId: modalVenda.clienteId, doceId: doce.id, doceNome: doce.nome, preco: doce.preco,
-                    data: new Date().toLocaleDateString('pt-BR'), timestamp: Date.now() 
+                    data: new Date().toLocaleDateString('pt-PT'), timestamp: Date.now() 
                 }]);
                 setModalVenda({ aberto: false, clienteId: null, clienteNome: '' });
                 setDoceSelecionado('');
@@ -181,6 +199,7 @@
                 }
             };
 
+            // Lógica Pagamentos
             const confirmarPagamento = (e) => {
                 e.preventDefault();
                 const valorF = parseFloat(valorPagamento.toString().replace(',', '.'));
@@ -188,7 +207,7 @@
 
                 setLogsPagamentos([...logsPagamentos, {
                     id: gerarId(), clienteId: modalPagamento.clienteId, clienteNome: modalPagamento.clienteNome, valor: valorF,
-                    data: new Date().toLocaleDateString('pt-BR'), hora: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}), timestamp: Date.now()
+                    data: new Date().toLocaleDateString('pt-PT'), hora: new Date().toLocaleTimeString('pt-PT', {hour: '2-digit', minute:'2-digit'}), timestamp: Date.now()
                 }]);
 
                 if (valorF >= modalPagamento.totalDevido - 0.01) {
@@ -196,7 +215,7 @@
                     setPagamentos(pagamentos.filter(p => p.clienteId !== modalPagamento.clienteId));
                 } else {
                     setPagamentos([...pagamentos, {
-                        id: gerarId(), clienteId: modalPagamento.clienteId, valor: valorF, data: new Date().toLocaleDateString('pt-BR'), timestamp: Date.now()
+                        id: gerarId(), clienteId: modalPagamento.clienteId, valor: valorF, data: new Date().toLocaleDateString('pt-PT'), timestamp: Date.now()
                     }]);
                 }
                 setModalPagamento({ aberto: false, clienteId: null, clienteNome: '', totalDevido: 0 });
@@ -212,7 +231,7 @@
             const abrirWhatsapp = (e, numero) => {
                 e.stopPropagation();
                 let numLimpo = numero.replace(/\D/g, ''); 
-                if (numLimpo.length <= 11) numLimpo = '55' + numLimpo;
+                if (numLimpo.length <= 11) numLimpo = '55' + numLimpo; // Indicativo
                 window.open(`https://wa.me/${numLimpo}`, '_blank');
             };
 
@@ -259,7 +278,7 @@
                                                                 </div>
                                                                 <div className="flex items-center space-x-3 mt-1.5">
                                                                     <span className="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded font-medium border border-slate-200">{cliente.departamento}</span>
-                                                                    {!estaExpandido && saldoDevido > 0 && <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded flex items-center border border-red-100">R$ {saldoDevido.toFixed(2).replace('.', ',')}</span>}
+                                                                    {!estaExpandido && saldoDevido > 0 && <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded flex items-center border border-red-100">€ {saldoDevido.toFixed(2).replace('.', ',')}</span>}
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center space-x-2">
@@ -283,12 +302,12 @@
                                                                             {comprasDoCliente.map(compra => (
                                                                                 <div key={compra.id} className="flex justify-between items-center text-sm border-b border-gray-200/60 pb-2 pt-2">
                                                                                     <div className="flex flex-col flex-1"><span className="text-slate-900 font-semibold">{compra.doceNome}</span><span className="text-slate-500 text-[11px]">{compra.data}</span></div>
-                                                                                    <div className="flex items-center space-x-3"><span className="font-bold text-slate-800">R$ {compra.preco.toFixed(2).replace('.', ',')}</span><button onClick={() => removerVenda(compra.id, compra.doceId)} className="p-1.5 text-slate-400 hover:text-white hover:bg-red-500 rounded"><Icon name="trash-2" className="w-4 h-4" /></button></div>
+                                                                                    <div className="flex items-center space-x-3"><span className="font-bold text-slate-800">€ {compra.preco.toFixed(2).replace('.', ',')}</span><button onClick={() => removerVenda(compra.id, compra.doceId)} className="p-1.5 text-slate-400 hover:text-white hover:bg-red-500 rounded"><Icon name="trash-2" className="w-4 h-4" /></button></div>
                                                                                 </div>
                                                                             ))}
                                                                         </div>
                                                                         <div className="flex justify-between items-end pt-4 border-t border-gray-300">
-                                                                            <div className="flex flex-col"><span className="text-xs text-slate-500 font-medium">Pendente:</span><span className="text-red-600 text-lg font-black">R$ {saldoDevido.toFixed(2).replace('.', ',')}</span></div>
+                                                                            <div className="flex flex-col"><span className="text-xs text-slate-500 font-medium">Pendente:</span><span className="text-red-600 text-lg font-black">€ {saldoDevido.toFixed(2).replace('.', ',')}</span></div>
                                                                             {saldoDevido > 0 && <button onClick={() => { setModalPagamento({ aberto: true, clienteId: cliente.id, clienteNome: cliente.nome, totalDevido: saldoDevido }); setValorPagamento(saldoDevido.toFixed(2)); }} className="flex items-center bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md active:scale-95"><Icon name="wallet" className="w-[18px] h-[18px] mr-1" />Receber</button>}
                                                                         </div>
                                                                     </div>
@@ -344,7 +363,7 @@
                                 <ul className="space-y-3">
                                     {doces.map(doce => (
                                         <li key={doce.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex justify-between items-center">
-                                            <div className="flex items-center space-x-4"><div className={`p-3 rounded-xl ${doce.estoque > 0 ? 'bg-indigo-50 text-indigo-600' : 'bg-gray-100 text-gray-400'}`}><Icon name="candy" className="w-6 h-6" /></div><div><p className={`font-bold text-base ${doce.estoque > 0 ? 'text-slate-900' : 'text-slate-400 line-through'}`}>{doce.nome}</p><div className="flex items-center space-x-3 mt-1"><span className="text-sm font-bold text-slate-700">R$ {doce.preco.toFixed(2).replace('.', ',')}</span><span className={`text-[10px] font-bold px-2 py-0.5 rounded ${doce.estoque > 0 ? 'text-emerald-700 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>{doce.estoque > 0 ? `${doce.estoque} un.` : 'Esgotado'}</span></div></div></div>
+                                            <div className="flex items-center space-x-4"><div className={`p-3 rounded-xl ${doce.estoque > 0 ? 'bg-indigo-50 text-indigo-600' : 'bg-gray-100 text-gray-400'}`}><Icon name="candy" className="w-6 h-6" /></div><div><p className={`font-bold text-base ${doce.estoque > 0 ? 'text-slate-900' : 'text-slate-400 line-through'}`}>{doce.nome}</p><div className="flex items-center space-x-3 mt-1"><span className="text-sm font-bold text-slate-700">€ {doce.preco.toFixed(2).replace('.', ',')}</span><span className={`text-[10px] font-bold px-2 py-0.5 rounded ${doce.estoque > 0 ? 'text-emerald-700 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>{doce.estoque > 0 ? `${doce.estoque} un.` : 'Esgotado'}</span></div></div></div>
                                             <div className="flex space-x-2"><button onClick={() => setModalEditaDoce({ aberto: true, doce: { ...doce, preco: doce.preco.toString(), estoque: doce.estoque.toString() } })} className="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"><Icon name="edit-2" className="w-[18px] h-[18px]" /></button><button onClick={() => removerDoce(doce.id)} className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Icon name="trash-2" className="w-[18px] h-[18px]" /></button></div>
                                         </li>
                                     ))}
@@ -359,7 +378,7 @@
                                     <div className="absolute -left-6 -bottom-6 w-32 h-32 bg-white rounded-full opacity-10 blur-2xl"></div>
                                     <Icon name="history" className="w-8 h-8 mx-auto mb-3 text-emerald-100" />
                                     <p className="text-emerald-100 text-sm font-bold uppercase tracking-widest mb-1">Total Arrecadado</p>
-                                    <p className="text-4xl font-black tracking-tight">R$ {logsPagamentos.reduce((a,c)=>a+c.valor,0).toFixed(2).replace('.',',')}</p>
+                                    <p className="text-4xl font-black tracking-tight">€ {logsPagamentos.reduce((a,c)=>a+c.valor,0).toFixed(2).replace('.',',')}</p>
                                 </div>
                                 <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex justify-between items-center">
                                     <div className="flex items-center text-slate-600"><Icon name="alert-circle" className="w-[18px] h-[18px] mr-2 text-indigo-500" /><span className="text-[11px] font-medium leading-tight">Backup: Baixe para não perder os dados.</span></div>
@@ -369,7 +388,7 @@
                                     {[...logsPagamentos].sort((a, b) => b.timestamp - a.timestamp).map(log => (
                                         <div key={log.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex justify-between items-center">
                                             <div className="flex flex-col"><span className="font-bold text-slate-900 text-base">{log.clienteNome}</span><span className="text-[11px] text-slate-500 font-medium">{log.data} às {log.hora || '--:--'}</span></div>
-                                            <div className="flex items-center space-x-3"><span className="font-bold text-emerald-600 text-lg">+ R$ {log.valor.toFixed(2).replace('.', ',')}</span><button onClick={() => removerLogPagamento(log.id)} className="p-1.5 text-slate-300 hover:text-red-500 rounded"><Icon name="trash-2" className="w-4 h-4" /></button></div>
+                                            <div className="flex items-center space-x-3"><span className="font-bold text-emerald-600 text-lg">+ € {log.valor.toFixed(2).replace('.', ',')}</span><button onClick={() => removerLogPagamento(log.id)} className="p-1.5 text-slate-300 hover:text-red-500 rounded"><Icon name="trash-2" className="w-4 h-4" /></button></div>
                                         </div>
                                     ))}
                                 </div>
@@ -389,11 +408,11 @@
 
                     {/* MODAIS */}
                     {modalVenda.aberto && (
-                        <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4"><div className="bg-white rounded-2xl p-6 w-full max-w-sm"><div className="flex justify-between items-center mb-5 border-b pb-4"><h3 className="text-xl font-bold flex items-center"><Icon name="shopping-cart" className="w-5 h-5 mr-2 text-indigo-600" /> Nova Venda</h3><button onClick={() => setModalVenda({ aberto: false, clienteId: null, clienteNome: '' })} className="text-slate-400 bg-gray-100 p-1.5 rounded-full"><Icon name="x" className="w-5 h-5" /></button></div><form onSubmit={registrarVenda} className="space-y-5"><p className="text-sm font-medium text-slate-600">Cliente: <strong className="text-slate-900">{modalVenda.clienteNome}</strong></p><select className="w-full p-3.5 rounded-xl bg-slate-50 border border-gray-200 outline-none font-medium text-sm" value={doceSelecionado} onChange={(e) => setDoceSelecionado(e.target.value)} required><option value="" disabled>Escolher doce...</option>{doces.map(d => <option key={d.id} value={d.id} disabled={d.estoque <= 0}>{d.nome} - R$ {d.preco.toFixed(2)}</option>)}</select><button type="submit" className="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold mt-2">Confirmar Venda</button></form></div></div>
+                        <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4"><div className="bg-white rounded-2xl p-6 w-full max-w-sm"><div className="flex justify-between items-center mb-5 border-b pb-4"><h3 className="text-xl font-bold flex items-center"><Icon name="shopping-cart" className="w-5 h-5 mr-2 text-indigo-600" /> Nova Venda</h3><button onClick={() => setModalVenda({ aberto: false, clienteId: null, clienteNome: '' })} className="text-slate-400 bg-gray-100 p-1.5 rounded-full"><Icon name="x" className="w-5 h-5" /></button></div><form onSubmit={registrarVenda} className="space-y-5"><p className="text-sm font-medium text-slate-600">Cliente: <strong className="text-slate-900">{modalVenda.clienteNome}</strong></p><select className="w-full p-3.5 rounded-xl bg-slate-50 border border-gray-200 outline-none font-medium text-sm" value={doceSelecionado} onChange={(e) => setDoceSelecionado(e.target.value)} required><option value="" disabled>Escolher doce...</option>{doces.map(d => <option key={d.id} value={d.id} disabled={d.estoque <= 0}>{d.nome} - € {d.preco.toFixed(2)}</option>)}</select><button type="submit" className="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold mt-2">Confirmar Venda</button></form></div></div>
                     )}
 
                     {modalPagamento.aberto && (
-                        <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4"><div className="bg-white rounded-2xl p-6 w-full max-w-sm border-t-8 border-emerald-500"><div className="flex justify-between mb-2"><div className="bg-emerald-100 text-emerald-600 w-14 h-14 rounded-full flex items-center justify-center mb-4"><Icon name="check-circle-2" className="w-[28px] h-[28px]" /></div><button onClick={() => setModalPagamento({ aberto: false, clienteId: null, clienteNome: '', totalDevido: 0 })} className="bg-gray-100 p-1.5 rounded-full"><Icon name="x" className="w-5 h-5" /></button></div><h3 className="text-xl font-black mb-1">Receber Pagamento</h3><p className="text-sm text-slate-500 mb-5">Pendente: <strong className="text-red-600">R$ {modalPagamento.totalDevido.toFixed(2)}</strong></p><form onSubmit={confirmarPagamento}><input type="number" step="0.01" max={modalPagamento.totalDevido} required className="w-full p-3.5 text-2xl font-black rounded-lg bg-gray-50 border border-gray-300 mb-4" value={valorPagamento} onChange={(e) => setValorPagamento(e.target.value)} /><button type="submit" className="w-full bg-emerald-500 text-white p-4 rounded-xl font-bold text-lg">Confirmar</button></form></div></div>
+                        <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4"><div className="bg-white rounded-2xl p-6 w-full max-w-sm border-t-8 border-emerald-500"><div className="flex justify-between mb-2"><div className="bg-emerald-100 text-emerald-600 w-14 h-14 rounded-full flex items-center justify-center mb-4"><Icon name="check-circle-2" className="w-[28px] h-[28px]" /></div><button onClick={() => setModalPagamento({ aberto: false, clienteId: null, clienteNome: '', totalDevido: 0 })} className="bg-gray-100 p-1.5 rounded-full"><Icon name="x" className="w-5 h-5" /></button></div><h3 className="text-xl font-black mb-1">Receber Pagamento</h3><p className="text-sm text-slate-500 mb-5">Pendente: <strong className="text-red-600">€ {modalPagamento.totalDevido.toFixed(2)}</strong></p><form onSubmit={confirmarPagamento}><input type="number" step="0.01" max={modalPagamento.totalDevido} required className="w-full p-3.5 text-2xl font-black rounded-lg bg-gray-50 border border-gray-300 mb-4" value={valorPagamento} onChange={(e) => setValorPagamento(e.target.value)} /><button type="submit" className="w-full bg-emerald-500 text-white p-4 rounded-xl font-bold text-lg">Confirmar</button></form></div></div>
                     )}
 
                     {modalEditaCliente.aberto && (
@@ -406,6 +425,9 @@
                 </div>
             );
         }
-        </script>
-    </body>
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
 </html>

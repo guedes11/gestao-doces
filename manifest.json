@@ -1,10 +1,13 @@
 {
   "name": "Gestão de Doces",
   "short_name": "Doces",
-  "start_url": "./index.html",
+  "id": "gestao-doces-pwa",
+  "start_url": ".",
+  "scope": "/gestao-doces/",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#4f46e5",
+  "description": "Controle de vendas e estoque de doces.",
   "icons": [
     {
       "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9.5 7.5-2 2a4.95 4.95 0 1 0 7 7l2-2a4.95 4.95 0 1 0-7-7Z'/%3E%3Cpath d='M14 6.5v10'/%3E%3Cpath d='M10 7.5v10'/%3E%3Cpath d='m16 7 1-5 1.36.68A3 3 0 0 0 19.7 3h.3v.3a3 3 0 0 0-.68 1.34L20 6l-4 1Z'/%3E%3Cpath d='m8 17-1 5-1.36-.68A3 3 0 0 0 4.3 21H4v-.3a3 3 0 0 0 .68-1.34L4 18l4-1Z'/%3E%3C/svg%3E",
@@ -20,25 +23,3 @@
     }
   ]
 }
-
-#### 2. Crie o ficheiro `sw.js`
-Este é o *Service Worker*. É ele que avisa o telemóvel: "Estou seguro e consigo funcionar offline!". Crie o ficheiro, cole este código e faça *Commit changes*:
-```javascript
-const CACHE_NAME = 'doces-cache-v1';
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json'
-];
-
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
-  );
-});
-
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
-  );
-});

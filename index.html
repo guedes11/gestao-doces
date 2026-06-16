@@ -11,6 +11,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9.5 7.5-2 2a4.95 4.95 0 1 0 7 7l2-2a4.95 4.95 0 1 0-7-7Z'/%3E%3Cpath d='M14 6.5v10'/%3E%3Cpath d='M10 7.5v10'/%3E%3Cpath d='m16 7 1-5 1.36.68A3 3 0 0 0 19.7 3h.3v.3a3 3 0 0 0-.68 1.34L20 6l-4 1Z'/%3E%3Cpath d='m8 17-1 5-1.36-.68A3 3 0 0 0 4.3 21H4v-.3a3 3 0 0 0 .68-1.34L4 18l4-1Z'/%3E%3C/svg%3E">
 
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style type="text/tailwindcss">
@@ -48,10 +51,6 @@
             -webkit-tap-highlight-color: transparent;
         }
         ::-webkit-scrollbar { width: 0px; background: transparent; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .modal { display: none; }
-        .modal.active { display: flex; }
     </style>
 
     <script>
@@ -72,728 +71,627 @@
     </script>
 </head>
 <body>
+    <div id="root"></div>
 
-    <!-- Container Principal -->
-    <div class="min-h-screen relative pb-24 transition-colors duration-300">
-        <!-- Header -->
-        <header class="bg-tcard pt-10 pb-5 px-6 border-b border-tborder sticky top-0 z-10 shadow-sm flex justify-center items-center transition-colors">
-            <h1 class="text-xl font-extrabold text-indigo-500 uppercase tracking-widest text-center">Gestão de Doces</h1>
-            <button onclick="abrirModal('modal-ajustes')" class="absolute right-6 p-2 bg-slate-500/10 rounded-full text-tmuted outline-none transition-colors">
-                <i data-lucide="settings" class="w-5 h-5"></i>
-            </button>
-        </header>
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
 
-        <main class="p-6 max-w-md mx-auto">
-            <!-- ABA RESUMO -->
-            <div id="aba-resumo" class="tab-content active space-y-6">
-                <div class="bg-red-500/10 p-5 rounded-2xl border border-red-500/20 flex justify-between items-center shadow-sm">
-                    <div>
-                        <p class="text-[11px] font-bold text-red-500 uppercase tracking-wider mb-1">Saldo a Receber</p>
-                        <p id="total-receber" class="text-2xl font-black text-red-500">R$ 0,00</p>
-                    </div>
-                    <div class="p-3 bg-tcard rounded-full shadow-sm text-red-500">
-                        <i data-lucide="wallet" class="w-6 h-6"></i>
-                    </div>
-                </div>
-                <div>
-                    <h3 class="text-sm font-bold text-tmain uppercase tracking-wider mb-4 px-1 flex items-center transition-colors">
-                        <i data-lucide="users" class="w-4 h-4 mr-2 text-indigo-500"></i> Contas de Clientes
-                    </h3>
-                    <div id="resumo-lista"></div>
-                </div>
-            </div>
+        const APP_VERSION = "2.5.0"; 
 
-            <!-- ABA CLIENTES -->
-            <div id="aba-clientes" class="tab-content space-y-6">
-                <div class="bg-tcard p-6 rounded-2xl border border-tborder shadow-sm transition-colors">
-                    <h2 class="text-lg font-bold text-tmain mb-4 flex items-center border-b border-tborder pb-2 transition-colors">
-                        <i data-lucide="users" class="w-5 h-5 mr-2 text-indigo-500"></i> Novo Cliente
-                    </h2>
-                    <form id="form-cliente" class="space-y-4">
-                        <input type="text" id="cli-nome" placeholder="Nome *" required class="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors">
-                        <input type="text" id="cli-dept" placeholder="Departamento *" required class="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors">
-                        <input type="tel" id="cli-zap" placeholder="WhatsApp (DDD + Número)" class="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors">
-                        <button type="submit" class="w-full bg-indigo-500 text-white p-3.5 rounded-xl font-bold shadow-lg active:scale-95 transition-all">Salvar Cliente</button>
-                    </form>
-                </div>
-                <div id="clientes-lista" class="space-y-3"></div>
-            </div>
-
-            <!-- ABA ESTOQUE -->
-            <div id="aba-doces" class="tab-content space-y-6">
-                <div class="bg-tcard p-6 rounded-2xl border border-tborder shadow-sm transition-colors">
-                    <h2 class="text-lg font-bold text-tmain mb-4 flex items-center border-b border-tborder pb-2 transition-colors">
-                        <i data-lucide="candy" class="w-5 h-5 mr-2 text-indigo-500"></i> Novo Produto
-                    </h2>
-                    <form id="form-doce" class="space-y-4">
-                        <input type="text" id="doce-nome" placeholder="Nome *" required class="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors">
-                        <div class="flex space-x-4">
-                            <input type="number" id="doce-preco" step="0.01" placeholder="Preço R$*" required class="w-1/2 p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors">
-                            <input type="number" id="doce-estoque" placeholder="Estoque *" required class="w-1/2 p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors">
-                        </div>
-                        <button type="submit" class="w-full bg-indigo-500 text-white p-3.5 rounded-xl font-bold shadow-lg active:scale-95 transition-all">Salvar Produto</button>
-                    </form>
-                </div>
-                <div id="doces-lista" class="space-y-3"></div>
-            </div>
-
-            <!-- ABA CAIXA -->
-            <div id="aba-caixa" class="tab-content space-y-6">
-                <div class="bg-gradient-to-br from-emerald-600 to-teal-800 p-8 rounded-2xl shadow-lg text-white text-center relative overflow-hidden transition-all duration-300">
-                    <div class="absolute -left-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-                    <i data-lucide="history" class="w-10 h-10 mx-auto mb-2"></i>
-                    <p class="text-emerald-100 text-[10px] font-bold uppercase tracking-widest transition-all">Total Arrecadado</p>
-                    <p id="caixa-total" class="text-4xl font-black tracking-tight transition-all">R$ 0,00</p>
-                </div>
-                <div id="caixa-lista" class="space-y-3"></div>
-            </div>
-        </main>
-
-        <!-- Navegação Inferior -->
-        <nav class="fixed bottom-0 left-0 right-0 bg-tcard border-t border-tborder pb-safe z-20 shadow-lg flex justify-around p-2 transition-colors">
-            <button onclick="mudarAba('resumo')" class="nav-btn flex flex-col items-center p-2 transition-all text-indigo-500 scale-110" data-aba="resumo">
-                <i data-lucide="layout-dashboard" class="w-6 h-6"></i><span class="text-[10px] font-bold mt-1 uppercase tracking-wider">Vendas</span>
-            </button>
-            <button onclick="mudarAba('clientes')" class="nav-btn flex flex-col items-center p-2 transition-all text-tmuted opacity-60" data-aba="clientes">
-                <i data-lucide="users" class="w-6 h-6"></i><span class="text-[10px] font-bold mt-1 uppercase tracking-wider">Clientes</span>
-            </button>
-            <button onclick="mudarAba('doces')" class="nav-btn flex flex-col items-center p-2 transition-all text-tmuted opacity-60" data-aba="doces">
-                <i data-lucide="candy" class="w-6 h-6"></i><span class="text-[10px] font-bold mt-1 uppercase tracking-wider">Estoque</span>
-            </button>
-            <button onclick="mudarAba('caixa')" class="nav-btn flex flex-col items-center p-2 transition-all text-tmuted opacity-60" data-aba="caixa">
-                <i data-lucide="wallet" class="w-6 h-6"></i><span class="text-[10px] font-bold mt-1 uppercase tracking-wider">Caixa</span>
-            </button>
-        </nav>
-    </div>
-
-    <!-- MODAIS -->
-    <!-- Modal Ajustes -->
-    <div id="modal-ajustes" class="modal fixed inset-0 bg-black/80 z-50 items-center justify-center p-4 backdrop-blur-sm transition-all">
-        <div class="bg-tcard rounded-3xl p-6 w-full max-w-sm border border-tborder shadow-2xl">
-            <div class="flex justify-between items-center mb-6 border-b border-tborder pb-4 transition-all">
-                <h3 class="text-lg font-bold text-tmain flex items-center"><i data-lucide="settings" class="w-5 h-5 mr-2 text-indigo-500"></i> Configurações</h3>
-                <button onclick="fecharModal('modal-ajustes')" class="text-tmuted bg-slate-500/10 p-2 rounded-full active:scale-90 transition-all outline-none"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="space-y-6 transition-all">
-                <div>
-                    <label class="text-[10px] font-black text-tmuted uppercase mb-3 block tracking-widest text-center opacity-70">Tema Visual</label>
-                    <div class="flex bg-tinput p-1.5 rounded-2xl border border-tborder transition-colors">
-                        <button onclick="setTema('claro')" class="tema-btn flex-1 py-3 rounded-xl text-xs font-black capitalize transition-all text-tmuted hover:text-tmain" data-tema="claro">Claro</button>
-                        <button onclick="setTema('medio')" class="tema-btn flex-1 py-3 rounded-xl text-xs font-black capitalize transition-all text-tmuted hover:text-tmain" data-tema="medio">Médio</button>
-                        <button onclick="setTema('escuro')" class="tema-btn flex-1 py-3 rounded-xl text-xs font-black capitalize transition-all text-tmuted hover:text-tmain" data-tema="escuro">Escuro</button>
-                    </div>
-                </div>
-                <div class="border-t border-tborder pt-6 space-y-3 transition-all">
-                    <button onclick="exportarDados()" class="w-full flex items-center justify-center p-4 bg-indigo-500/10 text-indigo-500 font-black text-sm rounded-2xl border border-indigo-500/20 active:scale-95 transition-all shadow-lg"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Salvar Backup</button>
-                    <input type="file" id="import-file" accept=".json" class="hidden" onchange="importarDados(event)" />
-                    <button onclick="document.getElementById('import-file').click()" class="w-full flex items-center justify-center p-4 bg-slate-500/10 text-tmuted font-black text-sm rounded-2xl border border-tborder active:scale-95 transition-all shadow-sm"><i data-lucide="upload" class="w-4 h-4 mr-2"></i> Restaurar Backup</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Venda -->
-    <div id="modal-venda" class="modal fixed inset-0 bg-black/80 z-50 items-center justify-center p-4 backdrop-blur-sm transition-all">
-        <div class="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
-            <div class="flex justify-between items-center mb-8 transition-all">
-                <h3 class="text-2xl font-black text-tmain transition-all">Nova Venda</h3>
-                <button onclick="fecharModal('modal-venda')" class="p-2 text-tmuted bg-slate-500/10 rounded-full active:scale-90 transition-transform outline-none"><i data-lucide="x" class="w-6 h-6"></i></button>
-            </div>
-            <form id="form-venda" class="space-y-6 transition-all">
-                <p class="text-sm font-bold text-tmuted uppercase tracking-widest text-center transition-all">Cliente: <span id="venda-cliente-nome" class="text-indigo-500 font-black transition-all"></span></p>
-                <div class="flex space-x-3 transition-all">
-                    <div class="flex-1">
-                        <label class="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center opacity-70 transition-all">Produto</label>
-                        <select id="venda-doce-select" required class="w-full p-5 rounded-3xl bg-tinput text-tmain outline-none font-bold text-sm border border-tborder transition-colors">
-                            <!-- Opções populadas no JS -->
-                        </select>
-                    </div>
-                    <div class="w-24">
-                        <label class="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center opacity-70 transition-all">Qtd</label>
-                        <input type="number" id="venda-qtd" min="1" value="1" required class="w-full p-5 rounded-3xl bg-tinput text-tmain text-center font-black border border-tborder transition-colors" />
-                    </div>
-                </div>
-                <p id="erro-venda" class="hidden text-xs text-red-500 font-black bg-red-500/10 p-4 rounded-2xl border border-red-500/20 text-center transition-all"></p>
-                <button type="submit" class="w-full bg-indigo-500 text-white p-6 rounded-[30px] font-black text-xl shadow-2xl active:scale-95 transition-all">Confirmar</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Editar Doce -->
-    <div id="modal-edita-doce" class="modal fixed inset-0 bg-black/80 z-50 items-center justify-center p-4 backdrop-blur-sm transition-all">
-        <div class="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
-            <h3 class="text-2xl font-black text-tmain mb-8 text-center uppercase tracking-tighter">Editar Produto</h3>
-            <form id="form-edita-doce" class="space-y-4 transition-all">
-                <label class="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70 transition-all">Nome do Produto</label>
-                <input type="text" id="edita-doce-nome" required class="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
-                <div class="flex space-x-3 transition-all">
-                    <div class="flex-1">
-                        <label class="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70 transition-all">Preço R$</label>
-                        <input type="number" id="edita-doce-preco" step="0.01" required class="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
-                    </div>
-                    <div class="flex-1">
-                        <label class="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70 transition-all">Estoque</label>
-                        <input type="number" id="edita-doce-estoque" required class="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
-                    </div>
-                </div>
-                <div class="flex space-x-3 pt-6 transition-all">
-                    <button type="button" onclick="fecharModal('modal-edita-doce')" class="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all outline-none">Cancelar</button>
-                    <button type="submit" class="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl active:scale-95 transition-all outline-none">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Editar Cliente -->
-    <div id="modal-edita-cliente" class="modal fixed inset-0 bg-black/80 z-50 items-center justify-center p-4 backdrop-blur-sm transition-all">
-        <div class="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
-            <h3 class="text-2xl font-black text-tmain mb-8 text-center uppercase tracking-tighter transition-all">Editar Cliente</h3>
-            <form id="form-edita-cliente" class="space-y-4 transition-all">
-                <input type="text" id="edita-cli-nome" required class="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" />
-                <input type="text" id="edita-cli-dept" required class="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" />
-                <input type="tel" id="edita-cli-zap" class="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" />
-                <div class="flex space-x-3 pt-6 transition-all">
-                    <button type="button" onclick="fecharModal('modal-edita-cliente')" class="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all outline-none">Cancelar</button>
-                    <button type="submit" class="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl active:scale-95 transition-all outline-none">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Pagamento -->
-    <div id="modal-pagamento" class="modal fixed inset-0 bg-black/90 z-50 items-center justify-center p-4 backdrop-blur-xl transition-all">
-        <div class="bg-tcard rounded-[50px] p-10 w-full max-w-sm border border-tborder shadow-2xl transition-all">
-            <h3 class="text-3xl font-black text-tmain mb-1 text-center transition-all">Receber</h3>
-            <p id="pagamento-total-texto" class="text-sm text-tmuted mb-10 text-center font-bold tracking-widest uppercase opacity-60 transition-all"></p>
-            <form id="form-pagamento" class="space-y-6 transition-all">
-                <div class="relative transition-all">
-                    <span class="absolute left-6 top-1/2 -translate-y-1/2 font-black text-tmuted text-xl transition-all">R$</span>
-                    <input type="number" id="pagamento-valor" step="0.01" required class="w-full p-8 pl-14 rounded-[35px] bg-tinput text-tmain text-4xl font-black outline-none border border-tborder shadow-inner transition-colors" />
-                </div>
-                <button type="submit" class="w-full bg-emerald-500 text-white p-8 rounded-[35px] font-black text-2xl shadow-2xl active:scale-95 transition-all">Confirmar Pagamento</button>
-                <button type="button" onclick="fecharModal('modal-pagamento')" class="w-full text-tmuted font-black py-2 uppercase text-xs tracking-widest opacity-40 outline-none transition-all">Voltar</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Confirmação Customizado -->
-    <div id="modal-confirm" class="modal fixed inset-0 bg-black/80 z-[60] items-center justify-center p-4 backdrop-blur-md transition-all">
-        <div class="bg-tcard rounded-[40px] p-8 w-full max-w-xs border border-tborder shadow-2xl text-center transition-colors">
-            <div class="mx-auto bg-red-500/10 text-red-500 w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-all"><i data-lucide="alert-circle" class="w-10 h-10"></i></div>
-            <p id="confirm-msg" class="font-black text-tmain mb-8 leading-tight text-xl transition-all"></p>
-            <div class="flex space-x-3 transition-all">
-                <button onclick="fecharModal('modal-confirm')" class="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase active:scale-95 transition-all outline-none">Não</button>
-                <button id="btn-confirm-action" class="flex-1 p-5 rounded-3xl bg-red-500 text-white font-black uppercase shadow-xl active:scale-95 transition-all outline-none">Sim</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toasts -->
-    <div id="toast" class="fixed top-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-full shadow-2xl z-[100] text-white flex items-center font-black text-sm border border-white/20 transition-all duration-500 opacity-0 translate-y-[-100%] pointer-events-none">
-        <i id="toast-icon" data-lucide="check-circle-2" class="w-5 h-5 mr-3"></i>
-        <span id="toast-msg"></span>
-    </div>
-
-    <!-- Bibliotecas de Ícones -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- SCRIPTS CORE (VANILLA JS - 100% Compatível e Rápido) -->
-    <script>
-        // --- GERENCIAMENTO DE ESTADO LOCAL ---
-        let db = {
-            tema: localStorage.getItem('g_doces_tema') || 'claro',
-            clientes: JSON.parse(localStorage.getItem('g_doces_clientes') || '[]'),
-            doces: JSON.parse(localStorage.getItem('g_doces_produtos') || '[]'),
-            vendas: JSON.parse(localStorage.getItem('g_doces_vendas') || '[]'),
-            pagamentos: JSON.parse(localStorage.getItem('g_doces_pagamentos') || '[]'),
-            logsPagamentos: JSON.parse(localStorage.getItem('g_doces_logs') || '[]'),
+        const ICONS = {
+            store: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>`,
+            users: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+            candy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.5 7.5-2 2a4.95 4.95 0 1 0 7 7l2-2a4.95 4.95 0 1 0-7-7Z"/><path d="M14 6.5v10"/><path d="M10 7.5v10"/><path d="m16 7 1-5 1.36.68A3 3 0 0 0 19.7 3h.3v.3a3 3 0 0 0-.68 1.34L20 6l-4 1Z"/><path d="m8 17-1 5-1.36-.68A3 3 0 0 0 4.3 21H4v-.3a3 3 0 0 0 .68-1.34L4 18l4-1Z"/></svg>`,
+            history: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>`,
+            receipt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17V7"/></svg>`,
+            'layout-dashboard': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>`,
+            wallet: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>`,
+            'shopping-cart': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`,
+            phone: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+            'trash-2': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`,
+            plus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`,
+            x: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
+            'check-circle-2': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`,
+            'edit-2': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`,
+            download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>`,
+            upload: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>`,
+            'alert-circle': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>`,
+            'chevron-down': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`,
+            'chevron-up': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`,
+            settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`,
+            sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`,
+            database: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>`
         };
 
-        const salvarDb = () => {
-            localStorage.setItem('g_doces_tema', db.tema);
-            localStorage.setItem('g_doces_clientes', JSON.stringify(db.clientes));
-            localStorage.setItem('g_doces_produtos', JSON.stringify(db.doces));
-            localStorage.setItem('g_doces_vendas', JSON.stringify(db.vendas));
-            localStorage.setItem('g_doces_pagamentos', JSON.stringify(db.pagamentos));
-            localStorage.setItem('g_doces_logs', JSON.stringify(db.logsPagamentos));
-            renderAll();
-        };
+        const Icon = ({ name, className }) => (
+            <span className={`inline-flex items-center justify-center ${className}`} dangerouslySetInnerHTML={{ __html: ICONS[name] }} />
+        );
 
-        // --- ESTADOS DA UI ---
-        let clienteAtualId = null;
-        let doceAtualId = null;
-        let confirmAction = null;
-        let clientesExpandidos = [];
-        let caixaExpandidos = [];
-
-        // --- UTILITÁRIOS ---
-        const gerarId = () => Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
-        const fmtMoney = (v) => parseFloat(v).toFixed(2).replace('.', ',');
-
-        let toastTimeout;
-        const mostrarToast = (msg, tipo = 'sucesso') => {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.className = `fixed top-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-full shadow-2xl z-[100] text-white flex items-center font-black text-sm border border-white/20 transition-all duration-500 ${tipo === 'erro' ? 'bg-red-500 translate-y-0 opacity-100' : 'bg-indigo-500 translate-y-0 opacity-100'}`;
-            
-            lucide.createIcons();
-
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.className = `fixed top-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-full shadow-2xl z-[100] text-white flex items-center font-black text-sm border border-white/20 transition-all duration-500 -translate-y-[-100%] opacity-0 pointer-events-none ${tipo === 'erro' ? 'bg-red-500' : 'bg-indigo-500'}`;
-            }, 3000);
-        };
-
-        const abrirModal = (id) => document.getElementById(id).classList.add('active');
-        const fecharModal = (id) => document.getElementById(id).classList.remove('active');
-
-        const abrirConfirmacao = (msg, acao) => {
-            document.getElementById('confirm-msg').innerText = msg;
-            confirmAction = acao;
-            abrirModal('modal-confirm');
-        };
-
-        document.getElementById('btn-confirm-action').addEventListener('click', () => {
-            if (confirmAction) confirmAction();
-            fecharModal('modal-confirm');
-        });
-
-        // --- AÇÕES DO TEMA ---
-        const setTema = (novoTema) => {
-            db.tema = novoTema;
-            document.documentElement.className = `tema-${novoTema}`;
-            document.querySelectorAll('.tema-btn').forEach(btn => {
-                if (btn.getAttribute('data-tema') === novoTema) {
-                    btn.className = "tema-btn flex-1 py-3 rounded-xl text-xs font-black capitalize transition-all bg-tcard text-indigo-500 shadow-xl border border-tborder";
-                } else {
-                    btn.className = "tema-btn flex-1 py-3 rounded-xl text-xs font-black capitalize transition-all text-tmuted hover:text-tmain";
-                }
-            });
-            salvarDb();
-        };
-
-        // --- BACKUP ---
-        const exportarDados = () => {
-            const dataStr = JSON.stringify(db);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `backup_doces_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
-            a.click();
-            mostrarToast("Backup exportado!", "sucesso");
-        };
-
-        const importarDados = (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const dados = JSON.parse(e.target.result);
-                    abrirConfirmacao("Restaurar backup substituirá os dados atuais. Confirmar?", () => {
-                        db.clientes = dados.clientes || [];
-                        db.doces = dados.doces || [];
-                        db.vendas = dados.vendas || [];
-                        db.pagamentos = dados.pagamentos || [];
-                        db.logsPagamentos = dados.logsPagamentos || [];
-                        salvarDb();
-                        fecharModal('modal-ajustes');
-                        mostrarToast("Backup restaurado!", "sucesso");
-                    });
-                } catch (err) { mostrarToast("Erro ao ler arquivo.", "erro"); }
+        function App() {
+            const safeLoad = (key, defaultVal) => {
+                try { 
+                    const item = localStorage.getItem(key);
+                    return item ? JSON.parse(item) : defaultVal; 
+                } catch (e) { return defaultVal; }
             };
-            reader.readAsText(file);
-        };
 
-        // --- NAVEGAÇÃO ---
-        const mudarAba = (abaId) => {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(`aba-${abaId}`).classList.add('active');
+            const [tema, setTema] = useState(() => localStorage.getItem('g_doces_tema') || 'claro');
+            const [clientes, setClientes] = useState(() => safeLoad('g_doces_clientes', []));
+            const [doces, setDoces] = useState(() => safeLoad('g_doces_produtos', []));
+            const [vendas, setVendas] = useState(() => safeLoad('g_doces_vendas', []));
+            const [pagamentos, setPagamentos] = useState(() => safeLoad('g_doces_pagamentos', []));
+            const [logsPagamentos, setLogsPagamentos] = useState(() => safeLoad('g_doces_logs', []));
 
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.className = "nav-btn flex flex-col items-center p-2 transition-all text-tmuted opacity-60";
-                if(btn.getAttribute('data-aba') === abaId) {
-                    btn.className = `nav-btn flex flex-col items-center p-2 transition-all scale-110 ${abaId === 'caixa' ? 'text-emerald-500' : 'text-indigo-500'}`;
-                }
-            });
-            renderAll();
-        };
+            useEffect(() => {
+                document.documentElement.className = `tema-${tema}`;
+                localStorage.setItem('g_doces_tema', tema);
+            }, [tema]);
 
-        // --- EVENTOS DE FORMULÁRIOS ---
-        
-        // Novo Cliente
-        document.getElementById('form-cliente').addEventListener('submit', (e) => {
-            e.preventDefault();
-            db.clientes.push({
-                id: gerarId(),
-                nome: document.getElementById('cli-nome').value,
-                departamento: document.getElementById('cli-dept').value,
-                whatsapp: document.getElementById('cli-zap').value
-            });
-            e.target.reset();
-            salvarDb();
-            mostrarToast("Cliente salvo!");
-        });
+            useEffect(() => { localStorage.setItem('g_doces_clientes', JSON.stringify(clientes)); }, [clientes]);
+            useEffect(() => { localStorage.setItem('g_doces_produtos', JSON.stringify(doces)); }, [doces]);
+            useEffect(() => { localStorage.setItem('g_doces_vendas', JSON.stringify(vendas)); }, [vendas]);
+            useEffect(() => { localStorage.setItem('g_doces_pagamentos', JSON.stringify(pagamentos)); }, [pagamentos]);
+            useEffect(() => { localStorage.setItem('g_doces_logs', JSON.stringify(logsPagamentos)); }, [logsPagamentos]);
 
-        // Edita Cliente
-        document.getElementById('form-edita-cliente').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const index = db.clientes.findIndex(c => c.id === clienteAtualId);
-            if (index > -1) {
-                db.clientes[index].nome = document.getElementById('edita-cli-nome').value;
-                db.clientes[index].departamento = document.getElementById('edita-cli-dept').value;
-                db.clientes[index].whatsapp = document.getElementById('edita-cli-zap').value;
-                salvarDb();
-                fecharModal('modal-edita-cliente');
+            const [abaAtiva, setAbaAtiva] = useState('resumo'); 
+            const [modalVenda, setModalVenda] = useState({ aberto: false, clienteId: null, clienteNome: '' });
+            const [doceSelecionado, setDoceSelecionado] = useState('');
+            const [quantidadeVenda, setQuantidadeVenda] = useState(1);
+            const [erroVenda, setErroVenda] = useState('');
+            const [modalPagamento, setModalPagamento] = useState({ aberto: false, clienteId: null, clienteNome: '', totalDevido: 0 });
+            const [valorPagamento, setValorPagamento] = useState('');
+            
+            const [editandoCliente, setEditandoCliente] = useState(null);
+            const [editandoDoce, setEditandoDoce] = useState(null);
+            const [modalAjustes, setModalAjustes] = useState(false);
+            const [clientesExpandidos, setClientesExpandidos] = useState([]);
+            const [caixaExpandidos, setCaixaExpandidos] = useState([]); 
+            const [toast, setToast] = useState({ aberto: false, mensagem: '', tipo: 'success' });
+            const [modalConfirm, setModalConfirm] = useState({ aberto: false, mensagem: '', onConfirm: null });
+
+            const [novoCliente, setNovoCliente] = useState({ nome: '', departamento: '', whatsapp: '' });
+            const [novoDoce, setNovoDoce] = useState({ nome: '', preco: '', estoque: '' });
+
+            const fileInputRef = useRef(null);
+
+            const mostrarToast = (mensagem, tipo = 'success') => {
+                setToast({ aberto: true, mensagem, tipo });
+                setTimeout(() => setToast(t => ({ ...t, aberto: false })), 3000);
+            };
+
+            const exportarDados = () => {
+                const dados = { clientes, doces, vendas, pagamentos, logsPagamentos };
+                const blob = new Blob([JSON.stringify(dados)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup_doces_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                mostrarToast("Backup exportado!", "success");
+            };
+
+            const importarDados = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const dados = JSON.parse(e.target.result);
+                        setModalConfirm({
+                            mensagem: "Restaurar backup substituirá os dados atuais. Confirmar?",
+                            onConfirm: () => {
+                                setClientes(dados.clientes || []);
+                                setDoces(dados.doces || []);
+                                setVendas(dados.vendas || []);
+                                setPagamentos(dados.pagamentos || []);
+                                setLogsPagamentos(dados.logsPagamentos || []);
+                                setModalConfirm({ aberto: false });
+                                mostrarToast("Backup restaurado!", "success");
+                            },
+                            aberto: true
+                        });
+                    } catch (err) { mostrarToast("Erro ao ler arquivo.", "erro"); }
+                };
+                reader.readAsText(file);
+            };
+
+            const gerarId = () => Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+
+            const adicionarCliente = (e) => {
+                e.preventDefault();
+                setClientes([...clientes, { ...novoCliente, id: gerarId() }]);
+                setNovoCliente({ nome: '', departamento: '', whatsapp: '' });
+                mostrarToast("Cliente salvo!");
+            };
+
+            const atualizarCliente = (e) => {
+                e.preventDefault();
+                setClientes(clientes.map(c => c.id === editandoCliente.id ? editandoCliente : c));
+                setEditandoCliente(null);
                 mostrarToast("Cliente atualizado!");
-            }
-        });
+            };
 
-        // Novo Doce
-        document.getElementById('form-doce').addEventListener('submit', (e) => {
-            e.preventDefault();
-            db.doces.push({
-                id: gerarId(),
-                nome: document.getElementById('doce-nome').value,
-                preco: parseFloat(document.getElementById('doce-preco').value),
-                estoque: parseInt(document.getElementById('doce-estoque').value, 10)
-            });
-            e.target.reset();
-            salvarDb();
-            mostrarToast("Produto salvo!");
-        });
+            const removerCliente = (id) => {
+                setModalConfirm({
+                    mensagem: "Excluir cliente e suas dívidas permanentemente?",
+                    onConfirm: () => {
+                        setClientes(clientes.filter(c => c.id !== id));
+                        setVendas(vendas.filter(v => v.clienteId !== id));
+                        setPagamentos(pagamentos.filter(p => p.clienteId !== id));
+                        setModalConfirm({ aberto: false });
+                        mostrarToast("Cliente removido.");
+                    },
+                    aberto: true
+                });
+            };
 
-        // Edita Doce
-        document.getElementById('form-edita-doce').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const index = db.doces.findIndex(d => d.id === doceAtualId);
-            if (index > -1) {
-                db.doces[index].nome = document.getElementById('edita-doce-nome').value;
-                db.doces[index].preco = parseFloat(document.getElementById('edita-doce-preco').value);
-                db.doces[index].estoque = parseInt(document.getElementById('edita-doce-estoque').value, 10);
-                salvarDb();
-                fecharModal('modal-edita-doce');
+            const toggleExpandirCaixa = (id) => {
+                setCaixaExpandidos(prev => prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]);
+            };
+
+            const adicionarDoce = (e) => {
+                e.preventDefault();
+                const p = parseFloat(novoDoce.preco.toString().replace(',', '.'));
+                const s = parseInt(novoDoce.estoque, 10);
+                if (isNaN(p) || isNaN(s)) return;
+                setDoces([...doces, { id: gerarId(), nome: novoDoce.nome, preco: p, estoque: s }]);
+                setNovoDoce({ nome: '', preco: '', estoque: '' });
+                mostrarToast("Produto salvo!");
+            };
+
+            const atualizarDoce = (e) => {
+                e.preventDefault();
+                const p = parseFloat(editandoDoce.preco.toString().replace(',', '.'));
+                const s = parseInt(editandoDoce.estoque, 10);
+                setDoces(doces.map(d => d.id === editandoDoce.id ? { ...editandoDoce, preco: p, estoque: s } : d));
+                setEditandoDoce(null);
                 mostrarToast("Produto atualizado!");
-            }
-        });
+            };
 
-        // Nova Venda
-        document.getElementById('form-venda').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const doceId = document.getElementById('venda-doce-select').value;
-            const qtd = parseInt(document.getElementById('venda-qtd').value, 10);
-            const errEl = document.getElementById('erro-venda');
+            const removerDoce = (id) => {
+                setModalConfirm({
+                    mensagem: "Remover este produto do estoque?",
+                    onConfirm: () => {
+                        setDoces(doces.filter(d => d.id !== id));
+                        setModalConfirm({ aberto: false });
+                        mostrarToast("Produto removido.");
+                    },
+                    aberto: true
+                });
+            };
 
-            const doce = db.doces.find(d => d.id === doceId);
-            if (!doce) return;
+            const registrarVenda = (e) => {
+                e.preventDefault();
+                const doce = doces.find(d => d.id === doceSelecionado);
+                const qtd = parseInt(quantidadeVenda, 10);
+                if (!doce || doce.estoque < qtd) { setErroVenda("Estoque insuficiente."); return; }
 
-            if (doce.estoque < qtd) {
-                errEl.innerText = "Estoque insuficiente.";
-                errEl.classList.remove('hidden');
-                return;
-            }
+                setDoces(doces.map(d => d.id === doce.id ? { ...d, estoque: d.estoque - qtd } : d));
+                setVendas([...vendas, {
+                    id: gerarId(), clienteId: modalVenda.clienteId, doceId: doce.id,
+                    doceNome: qtd > 1 ? `${qtd}x ${doce.nome}` : doce.nome,
+                    preco: doce.preco * qtd, data: new Date().toLocaleDateString('pt-BR'), timestamp: Date.now()
+                }]);
+                setModalVenda({ aberto: false });
+                setDoceSelecionado('');
+                setQuantidadeVenda(1);
+                mostrarToast("Venda realizada!");
+            };
 
-            // Atualiza Estoque
-            doce.estoque -= qtd;
-            
-            // Registra Venda
-            db.vendas.push({
-                id: gerarId(),
-                clienteId: clienteAtualId,
-                doceId: doce.id,
-                doceNome: qtd > 1 ? `${qtd}x ${doce.nome}` : doce.nome,
-                preco: doce.preco * qtd,
-                data: new Date().toLocaleDateString('pt-BR'),
-                timestamp: Date.now()
-            });
+            const removerVenda = (vId, dId, nome) => {
+                setModalConfirm({
+                    mensagem: "Cancelar esta venda e devolver ao estoque?",
+                    onConfirm: () => {
+                        let qtd = 1;
+                        const match = nome.match(/^(\d+)x/);
+                        if(match) qtd = parseInt(match[1], 10);
+                        setDoces(doces.map(d => d.id === dId ? { ...d, estoque: d.estoque + qtd } : d));
+                        setVendas(vendas.filter(v => v.id !== vId));
+                        setModalConfirm({ aberto: false });
+                        mostrarToast("Venda cancelada.");
+                    },
+                    aberto: true
+                });
+            };
 
-            if(!clientesExpandidos.includes(clienteAtualId)) clientesExpandidos.push(clienteAtualId);
+            const confirmarPagamento = (e) => {
+                e.preventDefault();
+                const val = parseFloat(valorPagamento.toString().replace(',', '.'));
+                if (isNaN(val) || val <= 0) return;
 
-            errEl.classList.add('hidden');
-            fecharModal('modal-venda');
-            salvarDb();
-            mostrarToast("Venda realizada!");
-        });
+                const pid = gerarId();
+                setLogsPagamentos([...logsPagamentos, {
+                    id: pid, clienteId: modalPagamento.clienteId, clienteNome: modalPagamento.clienteNome, valor: val,
+                    data: new Date().toLocaleDateString('pt-BR'), hora: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}), timestamp: Date.now()
+                }]);
 
-        // Pagamento
-        document.getElementById('form-pagamento').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const val = parseFloat(document.getElementById('pagamento-valor').value);
-            const totalDevido = parseFloat(document.getElementById('modal-pagamento').getAttribute('data-devido'));
-            
-            if (isNaN(val) || val <= 0) return;
+                if (val >= modalPagamento.totalDevido - 0.01) {
+                    setVendas(vendas.filter(v => v.clienteId !== modalPagamento.clienteId));
+                    setPagamentos(pagamentos.filter(p => p.clienteId !== modalPagamento.clienteId));
+                } else {
+                    setPagamentos([...pagamentos, { id: pid, clienteId: modalPagamento.clienteId, valor: val, data: new Date().toLocaleDateString('pt-BR'), timestamp: Date.now() }]);
+                }
+                setModalPagamento({ aberto: false });
+                setValorPagamento('');
+                mostrarToast("Recebimento registrado!");
+            };
 
-            const cliente = db.clientes.find(c => c.id === clienteAtualId);
-            const pid = gerarId();
+            const removerLogPagamento = (id) => {
+                setModalConfirm({
+                    mensagem: "Remover este registro? (Isso desfará o pagamento na conta do cliente)",
+                    onConfirm: () => {
+                        setLogsPagamentos(logsPagamentos.filter(l => l.id !== id));
+                        setPagamentos(pagamentos.filter(p => p.id !== id));
+                        setModalConfirm({ aberto: false });
+                        mostrarToast("Registro removido.");
+                    },
+                    aberto: true
+                });
+            };
 
-            db.logsPagamentos.push({
-                id: pid, clienteId: clienteAtualId, clienteNome: cliente ? cliente.nome : 'Desconhecido', valor: val,
-                data: new Date().toLocaleDateString('pt-BR'), hora: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}), timestamp: Date.now()
-            });
+            return (
+                <div className="min-h-screen relative pb-24 transition-colors duration-300">
+                    <header className="bg-tcard pt-10 pb-5 px-6 border-b border-tborder sticky top-0 z-10 shadow-sm flex justify-center items-center transition-colors">
+                        <h1 className="text-xl font-extrabold text-indigo-500 uppercase tracking-widest text-center">Gestão de Doces</h1>
+                        <button onClick={() => setModalAjustes(true)} className="absolute right-6 p-2 bg-slate-500/10 rounded-full text-tmuted outline-none transition-colors">
+                            <Icon name="settings" className="w-5 h-5" />
+                        </button>
+                    </header>
 
-            if (val >= totalDevido - 0.01) {
-                db.vendas = db.vendas.filter(v => v.clienteId !== clienteAtualId);
-                db.pagamentos = db.pagamentos.filter(p => p.clienteId !== clienteAtualId);
-            } else {
-                db.pagamentos.push({ id: pid, clienteId: clienteAtualId, valor: val, data: new Date().toLocaleDateString('pt-BR'), timestamp: Date.now() });
-            }
+                    <main className="p-6 max-w-md mx-auto">
+                        
+                        {abaAtiva === 'resumo' && (
+                            <div className="space-y-6">
+                                {(() => {
+                                    const total = clientes.reduce((acc, c) => {
+                                        const v = vendas.filter(v => v.clienteId === c.id).reduce((s, v) => s + v.preco, 0);
+                                        const p = pagamentos.filter(p => p.clienteId === c.id).reduce((s, p) => s + p.valor, 0);
+                                        return acc + Math.max(0, v - p);
+                                    }, 0);
+                                    return (
+                                        <div className="bg-red-500/10 p-5 rounded-2xl border border-red-500/20 flex justify-between items-center shadow-sm">
+                                            <div><p className="text-[11px] font-bold text-red-500 uppercase tracking-wider mb-1">Saldo a Receber</p><p className="text-2xl font-black text-red-500">R$ {total.toFixed(2).replace('.', ',')}</p></div>
+                                            <div className="p-3 bg-tcard rounded-full shadow-sm text-red-500"><Icon name="wallet" className="w-6 h-6" /></div>
+                                        </div>
+                                    );
+                                })()}
+                                <div>
+                                    <h3 className="text-sm font-bold text-tmain uppercase tracking-wider mb-4 px-1 flex items-center transition-colors">
+                                        <Icon name="users" className="w-4 h-4 mr-2 text-indigo-500"/> Contas de Clientes
+                                    </h3>
+                                    {clientes.length === 0 ? <div className="text-center text-tmuted p-6 bg-tcard rounded-xl border border-tborder">Nenhum cliente salvo.</div> : (
+                                        <div className="space-y-3">
+                                            {[...clientes].sort((a,b)=>a.nome.localeCompare(b.nome)).map(c => {
+                                                const vens = vendas.filter(v => v.clienteId === c.id);
+                                                const pags = pagamentos.filter(p => p.clienteId === c.id);
+                                                const saldo = vens.reduce((s,v)=>s+v.preco,0) - pags.reduce((s,p)=>s+p.valor,0);
+                                                const exp = clientesExpandidos.includes(c.id);
 
-            fecharModal('modal-pagamento');
-            salvarDb();
-            mostrarToast("Recebimento registrado!");
-        });
-
-        // --- FUNÇÕES DE INTERAÇÃO NA LISTA ---
-        window.prepararEdicaoCliente = (id) => {
-            const c = db.clientes.find(x => x.id === id);
-            if(c) {
-                clienteAtualId = id;
-                document.getElementById('edita-cli-nome').value = c.nome;
-                document.getElementById('edita-cli-dept').value = c.departamento;
-                document.getElementById('edita-cli-zap').value = c.whatsapp || '';
-                abrirModal('modal-edita-cliente');
-            }
-        };
-
-        window.excluirCliente = (id) => {
-            abrirConfirmacao("Excluir cliente e suas dívidas permanentemente?", () => {
-                db.clientes = db.clientes.filter(c => c.id !== id);
-                db.vendas = db.vendas.filter(v => v.clienteId !== id);
-                db.pagamentos = db.pagamentos.filter(p => p.clienteId !== id);
-                salvarDb();
-                mostrarToast("Cliente removido.");
-            });
-        };
-
-        window.prepararEdicaoDoce = (id) => {
-            const d = db.doces.find(x => x.id === id);
-            if(d) {
-                doceAtualId = id;
-                document.getElementById('edita-doce-nome').value = d.nome;
-                document.getElementById('edita-doce-preco').value = d.preco;
-                document.getElementById('edita-doce-estoque').value = d.estoque;
-                abrirModal('modal-edita-doce');
-            }
-        };
-
-        window.excluirDoce = (id) => {
-            abrirConfirmacao("Remover este produto do estoque?", () => {
-                db.doces = db.doces.filter(d => d.id !== id);
-                salvarDb();
-                mostrarToast("Produto removido.");
-            });
-        };
-
-        window.prepararVenda = (id, nome) => {
-            clienteAtualId = id;
-            document.getElementById('venda-cliente-nome').innerText = nome;
-            const sel = document.getElementById('venda-doce-select');
-            sel.innerHTML = '<option value="" disabled selected>Escolher doce...</option>';
-            db.doces.forEach(d => {
-                sel.innerHTML += `<option value="${d.id}" ${d.estoque <= 0 ? 'disabled' : ''}>${d.nome} (R$ ${fmtMoney(d.preco)})</option>`;
-            });
-            document.getElementById('venda-qtd').value = 1;
-            document.getElementById('erro-venda').classList.add('hidden');
-            abrirModal('modal-venda');
-        };
-
-        window.cancelarVenda = (vId, dId, nome) => {
-            abrirConfirmacao("Cancelar esta venda e devolver ao estoque?", () => {
-                let qtd = 1;
-                const match = nome.match(/^(\d+)x/);
-                if(match) qtd = parseInt(match[1], 10);
-                
-                const doce = db.doces.find(d => d.id === dId);
-                if(doce) doce.estoque += qtd;
-                
-                db.vendas = db.vendas.filter(v => v.id !== vId);
-                salvarDb();
-                mostrarToast("Venda cancelada.");
-            });
-        };
-
-        window.prepararPagamento = (id, nome, devido) => {
-            clienteAtualId = id;
-            document.getElementById('modal-pagamento').setAttribute('data-devido', devido);
-            document.getElementById('pagamento-total-texto').innerText = `Total: R$ ${fmtMoney(devido)}`;
-            document.getElementById('pagamento-valor').value = devido.toFixed(2);
-            abrirModal('modal-pagamento');
-        };
-
-        window.removerLogCaixa = (id) => {
-            abrirConfirmacao("Remover este registro? (Isso desfará o pagamento na conta do cliente)", () => {
-                db.logsPagamentos = db.logsPagamentos.filter(l => l.id !== id);
-                db.pagamentos = db.pagamentos.filter(p => p.id !== id);
-                salvarDb();
-                mostrarToast("Registro removido.");
-            });
-        };
-
-        window.toggleExpandir = (id) => {
-            if(clientesExpandidos.includes(id)) {
-                clientesExpandidos = clientesExpandidos.filter(i => i !== id);
-            } else {
-                clientesExpandidos.push(id);
-            }
-            renderAll();
-        };
-
-        window.toggleCaixaExpandir = (id) => {
-            if(caixaExpandidos.includes(id)) {
-                caixaExpandidos = caixaExpandidos.filter(i => i !== id);
-            } else {
-                caixaExpandidos.push(id);
-            }
-            renderAll();
-        };
-
-        window.abrirZap = (e, zap) => {
-            e.stopPropagation();
-            let num = zap.replace(/\D/g, '');
-            if(num) window.open(`https://wa.me/55${num}`, '_blank');
-        };
-
-        // --- MOTOR DE RENDERIZAÇÃO DOM ---
-        function renderAll() {
-            setTema(db.tema);
-
-            // 1. Render Resumo
-            const totalReceber = db.clientes.reduce((acc, c) => {
-                const v = db.vendas.filter(v => v.clienteId === c.id).reduce((s, v) => s + v.preco, 0);
-                const p = db.pagamentos.filter(p => p.clienteId === c.id).reduce((s, p) => s + p.valor, 0);
-                return acc + Math.max(0, v - p);
-            }, 0);
-            document.getElementById('total-receber').innerText = `R$ ${fmtMoney(totalReceber)}`;
-
-            const resumoHTML = db.clientes.sort((a,b)=>a.nome.localeCompare(b.nome)).map(c => {
-                const vens = db.vendas.filter(v => v.clienteId === c.id);
-                const pags = db.pagamentos.filter(p => p.clienteId === c.id);
-                const saldo = vens.reduce((s,v)=>s+v.preco,0) - pags.reduce((s,p)=>s+p.valor,0);
-                const exp = clientesExpandidos.includes(c.id);
-
-                let html = `
-                <div class="bg-tcard rounded-xl border border-tborder shadow-sm overflow-hidden transition-colors">
-                    <div class="p-4 flex justify-between items-center cursor-pointer active:bg-slate-500/5 transition-colors" onclick="toggleExpandir('${c.id}')">
-                        <div class="flex-1">
-                            <div class="flex items-center"><h4 class="font-bold text-tmain mr-2 text-lg">${c.nome}</h4><i data-lucide="${exp?'chevron-up':'chevron-down'}" class="w-4 h-4 ${exp?'text-indigo-500':'text-tmuted'}"></i></div>
-                            <div class="flex items-center space-x-2 mt-1"><span class="bg-slate-500/10 text-tmuted text-[10px] px-2 py-0.5 rounded font-bold uppercase">${c.departamento}</span>${!exp && saldo > 0.01 ? `<span class="text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded">R$ ${fmtMoney(saldo)}</span>` : ''}</div>
-                        </div>
-                        <div class="flex items-center space-x-1">
-                            ${c.whatsapp ? `<button onclick="abrirZap(event, '${c.whatsapp}')" class="p-2 text-emerald-500 transition-transform active:scale-90"><i data-lucide="phone" class="w-5 h-5"></i></button>` : ''}
-                            ${exp ? `<button onclick="event.stopPropagation(); prepararVenda('${c.id}', '${c.nome}')" class="bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center shadow-lg active:scale-95 transition-all"><i data-lucide="shopping-cart" class="w-4 h-4 mr-1"></i> Vender</button>` : ''}
-                        </div>
-                    </div>`;
-                    
-                    if(exp) {
-                        html += `<div class="bg-tinput p-4 border-t border-tborder space-y-4 transition-colors">`;
-                        if(vens.length > 0) {
-                            html += `<div class="space-y-2">`;
-                            html += vens.map(v => `
-                                <div class="flex justify-between items-center text-sm border-b border-tborder/50 pb-2">
-                                    <div class="flex flex-col"><span class="font-semibold text-tmain">${v.doceNome}</span><span class="text-[10px] text-tmuted">${v.data}</span></div>
-                                    <div class="flex items-center space-x-2"><span class="font-bold text-tmain">R$ ${fmtMoney(v.preco)}</span><button onclick="cancelarVenda('${v.id}', '${v.doceId}', '${v.doceNome}')" class="text-red-500 p-1"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+                                                return (
+                                                    <div key={c.id} className="bg-tcard rounded-xl border border-tborder shadow-sm overflow-hidden transition-colors">
+                                                        <div className="p-4 flex justify-between items-center cursor-pointer active:bg-slate-500/5 transition-colors" onClick={() => setClientesExpandidos(exp ? clientesExpandidos.filter(id=>id!==c.id) : [...clientesExpandidos, c.id])}>
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center"><h4 className="font-bold text-tmain mr-2 text-lg">{c.nome}</h4><Icon name={exp?'chevron-up':'chevron-down'} className={`w-4 h-4 ${exp?'text-indigo-500':'text-tmuted'}`} /></div>
+                                                                <div className="flex items-center space-x-2 mt-1"><span className="bg-slate-500/10 text-tmuted text-[10px] px-2 py-0.5 rounded font-bold uppercase">{c.departamento}</span>{!exp && saldo > 0.01 && <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded">R$ {saldo.toFixed(2).replace('.', ',')}</span>}</div>
+                                                            </div>
+                                                            <div className="flex items-center space-x-1">
+                                                                {c.whatsapp && <button onClick={(e)=>{e.stopPropagation(); window.open(`https://wa.me/55${c.whatsapp.replace(/\D/g,'')}`)}} className="p-2 text-emerald-500 transition-transform active:scale-90"><Icon name="phone" className="w-5 h-5" /></button>}
+                                                                {exp && <button onClick={(e)=>{e.stopPropagation(); setModalVenda({aberto:true, clienteId:c.id, clienteNome:c.nome}); setErroVenda('');}} className="bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center shadow-lg active:scale-95 transition-all"><Icon name="shopping-cart" className="w-4 h-4 mr-1" /> Vender</button>}
+                                                            </div>
+                                                        </div>
+                                                        {exp && (
+                                                            <div className="bg-tinput p-4 border-t border-tborder space-y-4 transition-colors">
+                                                                {vens.length > 0 ? (
+                                                                    <>
+                                                                        <div className="space-y-2">
+                                                                            {vens.map(v => (
+                                                                                <div key={v.id} className="flex justify-between items-center text-sm border-b border-tborder/50 pb-2">
+                                                                                    <div className="flex flex-col"><span className="font-semibold text-tmain">{v.doceNome}</span><span className="text-[10px] text-tmuted">{v.data}</span></div>
+                                                                                    <div className="flex items-center space-x-2"><span className="font-bold text-tmain">R$ {v.preco.toFixed(2).replace('.', ',')}</span><button onClick={()=>removerVenda(v.id, v.doceId, v.doceNome)} className="text-red-500 p-1"><Icon name="x" className="w-4 h-4" /></button></div>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                        <div className="flex justify-between items-end pt-2 border-t border-tborder">
+                                                                            <div><p className="text-[10px] text-tmuted uppercase font-bold tracking-wider">Pendente</p><p className="text-xl font-black text-red-500">R$ {saldo.toFixed(2).replace('.',',')}</p></div>
+                                                                            {saldo > 0.01 && <button onClick={()=> {setModalPagamento({aberto:true, clienteId:c.id, clienteNome:c.nome, totalDevido:saldo}); setValorPagamento(saldo.toFixed(2));}} className="bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all">Receber</button>}
+                                                                        </div>
+                                                                    </>
+                                                                ) : <p className="text-xs text-tmuted text-center">Nenhuma dívida ativa.</p>}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
-                            `).join('');
-                            html += `</div>`;
-                            html += `
-                                <div class="flex justify-between items-end pt-2 border-t border-tborder">
-                                    <div><p class="text-[10px] text-tmuted uppercase font-bold tracking-wider">Pendente</p><p class="text-xl font-black text-red-500">R$ ${fmtMoney(saldo)}</p></div>
-                                    ${saldo > 0.01 ? `<button onclick="prepararPagamento('${c.id}', '${c.nome}', ${saldo})" class="bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-lg active:scale-95 transition-all">Receber</button>` : ''}
-                                </div>
-                            `;
-                        } else {
-                            html += `<p class="text-xs text-tmuted text-center">Nenhuma dívida ativa.</p>`;
-                        }
-                        html += `</div>`;
-                    }
-                html += `</div>`;
-                return html;
-            }).join('');
-            document.getElementById('resumo-lista').innerHTML = db.clientes.length === 0 ? `<div class="text-center text-tmuted p-6 bg-tcard rounded-xl border border-tborder">Nenhum cliente salvo.</div>` : resumoHTML;
-
-            // 2. Render Clientes Directory
-            document.getElementById('clientes-lista').innerHTML = db.clientes.map(c => `
-                <div class="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm transition-colors">
-                    <div><p class="font-bold text-tmain">${c.nome}</p><p class="text-[10px] text-tmuted uppercase font-bold tracking-wide">${c.departamento}</p></div>
-                    <div class="flex space-x-1">
-                        <button onclick="prepararEdicaoCliente('${c.id}')" class="p-2 text-indigo-500 active:scale-90 transition-transform"><i data-lucide="edit-2" class="w-5 h-5"></i></button>
-                        <button onclick="excluirCliente('${c.id}')" class="p-2 text-red-500 active:scale-90 transition-transform"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
-                    </div>
-                </div>
-            `).join('');
-
-            // 3. Render Doces Directory
-            document.getElementById('doces-lista').innerHTML = db.doces.map(d => `
-                <div class="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm transition-colors">
-                    <div class="flex items-center space-x-3">
-                        <div class="p-2 rounded-lg ${d.estoque>0?'bg-indigo-500/10 text-indigo-500':'bg-slate-500/10 text-tmuted'}"><i data-lucide="candy" class="w-5 h-5"></i></div>
-                        <div><p class="font-bold transition-colors ${d.estoque>0?'text-tmain':'text-tmuted line-through'}">${d.nome}</p><p class="text-xs text-tmuted font-bold uppercase tracking-wide">R$ ${fmtMoney(d.preco)} | ${d.estoque} un.</p></div>
-                    </div>
-                    <div class="flex space-x-1">
-                        <button onclick="prepararEdicaoDoce('${d.id}')" class="p-2 text-indigo-500 active:scale-90 transition-transform"><i data-lucide="edit-2" class="w-5 h-5"></i></button>
-                        <button onclick="excluirDoce('${d.id}')" class="p-2 text-red-500 active:scale-90 transition-transform"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
-                    </div>
-                </div>
-            `).join('');
-
-            // 4. Render Caixa
-            document.getElementById('caixa-total').innerText = `R$ ${fmtMoney(db.logsPagamentos.reduce((a,c)=>a+c.valor,0))}`;
-            
-            const agrupados = db.logsPagamentos.reduce((acc, log) => {
-                if (!acc[log.clienteId]) acc[log.clienteId] = { nome: log.clienteNome || "Desconhecido", total: 0, logs: [] };
-                acc[log.clienteId].total += log.valor;
-                acc[log.clienteId].logs.push(log);
-                return acc;
-            }, {});
-
-            const listaAgrupada = Object.entries(agrupados).sort((a,b) => a[1].nome.localeCompare(b[1].nome));
-
-            let caixaHTML = '';
-            if (listaAgrupada.length === 0) {
-                caixaHTML = '<div class="text-center text-tmuted p-6 bg-tcard rounded-xl border border-tborder">Nenhum pagamento registrado.</div>';
-            } else {
-                caixaHTML = listaAgrupada.map(([cId, dados]) => {
-                    const exp = caixaExpandidos.includes(cId);
-                    let h = `
-                    <div class="bg-tcard rounded-xl border border-tborder shadow-sm overflow-hidden transition-colors">
-                        <div class="p-4 flex justify-between items-center cursor-pointer active:bg-slate-500/5 transition-colors" onclick="toggleCaixaExpandir('${cId}')">
-                            <div class="flex-1">
-                                <div class="flex items-center">
-                                    <h4 class="font-bold text-tmain mr-2 text-lg">${dados.nome}</h4>
-                                    <i data-lucide="${exp?'chevron-up':'chevron-down'}" class="w-4 h-4 ${exp?'text-emerald-500':'text-tmuted'}"></i>
-                                </div>
-                                <p class="text-[10px] text-tmuted font-bold uppercase tracking-wide mt-1">${dados.logs.length} registro${dados.logs.length > 1 ? 's' : ''}</p>
                             </div>
-                            <div class="flex items-center"><span class="font-black text-emerald-500 text-lg">R$ ${fmtMoney(dados.total)}</span></div>
-                        </div>`;
-                        if(exp) {
-                            h += `<div class="bg-tinput p-4 border-t border-tborder space-y-2 transition-colors">`;
-                            h += dados.logs.sort((a,b)=>b.timestamp-a.timestamp).map(l => `
-                                <div class="flex justify-between items-center text-sm border-b border-tborder/50 pb-2 last:border-b-0 last:pb-0 pt-1">
-                                    <div class="flex flex-col"><span class="text-[10px] text-tmuted font-bold uppercase">${l.data} às ${l.hora}</span></div>
-                                    <div class="flex items-center space-x-3"><span class="font-bold text-tmain">R$ ${fmtMoney(l.valor)}</span><button onclick="event.stopPropagation(); removerLogCaixa('${l.id}')" class="text-red-500 p-1 active:scale-90 transition-transform"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
-                                </div>
-                            `).join('');
-                            h += `</div>`;
-                        }
-                    h += `</div>`;
-                    return h;
-                }).join('');
-            }
-            document.getElementById('caixa-lista').innerHTML = caixaHTML;
+                        )}
 
-            lucide.createIcons();
+                        {abaAtiva === 'clientes' && (
+                            <div className="space-y-6">
+                                <div className="bg-tcard p-6 rounded-2xl border border-tborder shadow-sm transition-colors">
+                                    <h2 className="text-lg font-bold text-tmain mb-4 flex items-center border-b border-tborder pb-2 transition-colors"><Icon name="users" className="w-5 h-5 mr-2 text-indigo-500" /> Novo Cliente</h2>
+                                    <form onSubmit={adicionarCliente} className="space-y-4">
+                                        <input type="text" placeholder="Nome *" required className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors" value={novoCliente.nome} onChange={e=>setNovoCliente({...novoCliente, nome:e.target.value})} />
+                                        <input type="text" placeholder="Departamento *" required className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors" value={novoCliente.departamento} onChange={e=>setNovoCliente({...novoCliente, departamento:e.target.value})} />
+                                        <input type="tel" placeholder="WhatsApp (DDD + Número)" className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors" value={novoCliente.whatsapp} onChange={e=>setNovoCliente({...novoCliente, whatsapp:e.target.value})} />
+                                        <button className="w-full bg-indigo-500 text-white p-3.5 rounded-xl font-bold shadow-lg active:scale-95 transition-all">Salvar Cliente</button>
+                                    </form>
+                                </div>
+                                <div className="space-y-3">
+                                    {clientes.map(c => (
+                                        <div key={c.id} className="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm transition-colors">
+                                            <div><p className="font-bold text-tmain">{c.nome}</p><p className="text-[10px] text-tmuted uppercase font-bold tracking-wide">{c.departamento}</p></div>
+                                            <div className="flex space-x-1">
+                                                <button onClick={()=>setEditandoCliente({...c})} className="p-2 text-indigo-500 active:scale-90 transition-transform"><Icon name="edit-2" className="w-5 h-5" /></button>
+                                                <button onClick={()=>removerCliente(c.id)} className="p-2 text-red-500 active:scale-90 transition-transform"><Icon name="trash-2" className="w-5 h-5" /></button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {abaAtiva === 'doces' && (
+                            <div className="space-y-6">
+                                <div className="bg-tcard p-6 rounded-2xl border border-tborder shadow-sm transition-colors">
+                                    <h2 className="text-lg font-bold text-tmain mb-4 flex items-center border-b border-tborder pb-2 transition-colors"><Icon name="candy" className="w-5 h-5 mr-2 text-indigo-500" /> Novo Produto</h2>
+                                    <form onSubmit={adicionarDoce} className="space-y-4">
+                                        <input type="text" placeholder="Nome *" required className="w-full p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors" value={novoDoce.nome} onChange={e=>setNovoDoce({...novoDoce, nome:e.target.value})} />
+                                        <div className="flex space-x-4">
+                                            <input type="number" step="0.01" placeholder="Preço R$*" required className="w-1/2 p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors" value={novoDoce.preco} onChange={e=>setNovoDoce({...novoDoce, preco:e.target.value})} />
+                                            <input type="number" placeholder="Estoque *" required className="w-1/2 p-3.5 rounded-xl bg-tinput text-tmain outline-none focus:ring-2 focus:ring-indigo-500 border border-tborder transition-colors" value={novoDoce.estoque} onChange={e=>setNovoDoce({...novoDoce, estoque:e.target.value})} />
+                                        </div>
+                                        <button className="w-full bg-indigo-500 text-white p-3.5 rounded-xl font-bold shadow-lg active:scale-95 transition-all">Salvar Produto</button>
+                                    </form>
+                                </div>
+                                <div className="space-y-3">
+                                    {doces.map(d => (
+                                        <div key={d.id} className="bg-tcard p-4 rounded-xl border border-tborder flex justify-between items-center shadow-sm transition-colors">
+                                            <div className="flex items-center space-x-3">
+                                                <div className={`p-2 rounded-lg ${d.estoque>0?'bg-indigo-500/10 text-indigo-500':'bg-slate-500/10 text-tmuted'}`}><Icon name="candy" className="w-5 h-5" /></div>
+                                                <div><p className={`font-bold transition-colors ${d.estoque>0?'text-tmain':'text-tmuted line-through'}`}>{d.nome}</p><p className="text-xs text-tmuted font-bold uppercase tracking-wide">R$ {d.preco.toFixed(2).replace('.', ',')} | {d.estoque} un.</p></div>
+                                            </div>
+                                            <div className="flex space-x-1">
+                                                <button onClick={()=>setEditandoDoce({...d, preco: d.preco.toString(), estoque: d.estoque.toString()})} className="p-2 text-indigo-500 active:scale-90 transition-transform"><Icon name="edit-2" className="w-5 h-5" /></button>
+                                                <button onClick={()=>removerDoce(d.id)} className="p-2 text-red-500 active:scale-90 transition-transform"><Icon name="trash-2" className="w-5 h-5" /></button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {abaAtiva === 'caixa' && (
+                            <div className="space-y-6">
+                                <div className="bg-gradient-to-br from-emerald-600 to-teal-800 p-8 rounded-2xl shadow-lg text-white text-center relative overflow-hidden transition-all duration-300">
+                                    <div className="absolute -left-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                                    <Icon name="history" className="w-10 h-10 mx-auto mb-2" />
+                                    <p className="text-emerald-100 text-[10px] font-bold uppercase tracking-widest">Total Arrecadado</p>
+                                    <p className="text-4xl font-black tracking-tight transition-all">R$ {logsPagamentos.reduce((a,c)=>a+c.valor,0).toFixed(2).replace('.',',')}</p>
+                                </div>
+                                
+                                <div className="space-y-3">
+                                    {(() => {
+                                        const agrupados = logsPagamentos.reduce((acc, log) => {
+                                            if (!acc[log.clienteId]) acc[log.clienteId] = { nome: log.clienteNome, total: 0, logs: [] };
+                                            acc[log.clienteId].total += log.valor;
+                                            acc[log.clienteId].logs.push(log);
+                                            return acc;
+                                        }, {});
+
+                                        const listaAgrupada = Object.entries(agrupados).sort((a,b) => a[1].nome.localeCompare(b[1].nome));
+
+                                        if (listaAgrupada.length === 0) {
+                                            return <div className="text-center text-tmuted p-6 bg-tcard rounded-xl border border-tborder">Nenhum pagamento registrado.</div>;
+                                        }
+
+                                        return listaAgrupada.map(([clienteId, dados]) => {
+                                            const exp = caixaExpandidos.includes(clienteId);
+                                            return (
+                                                <div key={clienteId} className="bg-tcard rounded-xl border border-tborder shadow-sm overflow-hidden transition-colors">
+                                                    <div className="p-4 flex justify-between items-center cursor-pointer active:bg-slate-500/5 transition-colors" onClick={() => toggleExpandirCaixa(clienteId)}>
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center">
+                                                                <h4 className="font-bold text-tmain mr-2 text-lg">{dados.nome}</h4>
+                                                                <Icon name={exp?'chevron-up':'chevron-down'} className={`w-4 h-4 ${exp?'text-emerald-500':'text-tmuted'}`} />
+                                                            </div>
+                                                            <p className="text-[10px] text-tmuted font-bold uppercase tracking-wide mt-1">
+                                                                {dados.logs.length} registro{dados.logs.length > 1 ? 's' : ''}
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex items-center">
+                                                            <span className="font-black text-emerald-500 text-lg">R$ {dados.total.toFixed(2).replace('.', ',')}</span>
+                                                        </div>
+                                                    </div>
+                                                    {exp && (
+                                                        <div className="bg-tinput p-4 border-t border-tborder space-y-2 transition-colors">
+                                                            {dados.logs.sort((a,b)=>b.timestamp-a.timestamp).map(l => (
+                                                                <div key={l.id} className="flex justify-between items-center text-sm border-b border-tborder/50 pb-2 last:border-b-0 last:pb-0">
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-[10px] text-tmuted font-bold uppercase">{l.data} às {l.hora}</span>
+                                                                    </div>
+                                                                    <div className="flex items-center space-x-3">
+                                                                        <span className="font-bold text-tmain">R$ {l.valor.toFixed(2).replace('.', ',')}</span>
+                                                                        <button onClick={(e)=>{e.stopPropagation(); removerLogPagamento(l.id);}} className="text-red-500 p-1 active:scale-90 transition-transform">
+                                                                            <Icon name="trash-2" className="w-4 h-4" />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        });
+                                    })()}
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* NAVEGAÇÃO INFERIOR */}
+                    <nav className="fixed bottom-0 left-0 right-0 bg-tcard border-t border-tborder pb-safe z-20 shadow-lg flex justify-around p-2 transition-colors">
+                        <button onClick={()=>setAbaAtiva('resumo')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='resumo'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="layout-dashboard" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Vendas</span></button>
+                        <button onClick={()=>setAbaAtiva('clientes')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='clientes'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="users" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Clientes</span></button>
+                        <button onClick={()=>setAbaAtiva('doces')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='doces'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="candy" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Estoque</span></button>
+                        <button onClick={()=>setAbaAtiva('caixa')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='caixa'?'text-emerald-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="wallet" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Caixa</span></button>
+                    </nav>
+
+                    {/* MODAL CONFIGURAÇÕES */}
+                    {modalAjustes && (
+                        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
+                            <div className="bg-tcard rounded-3xl p-6 w-full max-w-sm border border-tborder shadow-2xl">
+                                <div className="flex justify-between items-center mb-6 border-b border-tborder pb-4">
+                                    <h3 className="text-lg font-bold text-tmain flex items-center"><Icon name="settings" className="w-5 h-5 mr-2 text-indigo-500" /> Configurações</h3>
+                                    <button onClick={()=>setModalAjustes(false)} className="text-tmuted bg-slate-500/10 p-2 rounded-full active:scale-90 transition-all outline-none"><Icon name="x" className="w-5 h-5" /></button>
+                                </div>
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="text-[10px] font-black text-tmuted uppercase mb-3 block tracking-widest text-center opacity-70">Tema Visual</label>
+                                        <div className="flex bg-tinput p-1.5 rounded-2xl border border-tborder transition-colors">
+                                            {['claro','medio','escuro'].map(t=>(
+                                                <button key={t} onClick={()=>setTema(t)} className={`flex-1 py-3 rounded-xl text-xs font-black capitalize transition-all ${tema===t?'bg-tcard text-indigo-500 shadow-xl border border-tborder':'text-tmuted hover:text-tmain'}`}>{t}</button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="border-t border-tborder pt-6 space-y-3">
+                                        <button onClick={exportarDados} className="w-full flex items-center justify-center p-4 bg-indigo-500/10 text-indigo-500 font-black text-sm rounded-2xl border border-indigo-500/20 active:scale-95 transition-all shadow-lg"><Icon name="download" className="w-4 h-4 mr-2" /> Salvar Backup</button>
+                                        <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={e=>{importarDados(e); setModalAjustes(false);}} />
+                                        <button onClick={()=>fileInputRef.current.click()} className="w-full flex items-center justify-center p-4 bg-slate-500/10 text-tmuted font-black text-sm rounded-2xl border border-tborder active:scale-95 transition-all shadow-sm"><Icon name="upload" className="w-4 h-4 mr-2" /> Restaurar Backup</button>
+                                    </div>
+                                    <div className="text-center space-y-1 pt-2 opacity-60">
+                                        <p className="text-[10px] text-tmuted font-bold tracking-widest uppercase transition-all">Versão {APP_VERSION}</p>
+                                        <p className="text-[9px] text-indigo-500/80 font-black uppercase tracking-tighter transition-all">Desenvolvido por Gemini</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* MODAL VENDA */}
+                    {modalVenda.aberto && (
+                        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
+                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
+                                <div className="flex justify-between items-center mb-8 transition-all"><h3 className="text-2xl font-black text-tmain">Nova Venda</h3><button onClick={()=>setModalVenda({aberto:false})} className="p-2 text-tmuted bg-slate-500/10 rounded-full active:scale-90 transition-transform outline-none"><Icon name="x" className="w-6 h-6" /></button></div>
+                                <form onSubmit={registrarVenda} className="space-y-6">
+                                    <p className="text-sm font-bold text-tmuted uppercase tracking-widest text-center">Cliente: <span className="text-indigo-500 font-black transition-all">{modalVenda.clienteNome}</span></p>
+                                    <div className="flex space-x-3 transition-all">
+                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center opacity-70">Produto</label>
+                                            <select required className="w-full p-5 rounded-3xl bg-tinput text-tmain outline-none font-bold text-sm border border-tborder transition-colors" value={doceSelecionado} onChange={e=>{setDoceSelecionado(e.target.value); setErroVenda('');}}>
+                                                <option value="" disabled>Escolher doce...</option>
+                                                {doces.map(d=><option key={d.id} value={d.id} disabled={d.estoque<=0}>{d.nome} (R$ {d.preco.toFixed(2).replace('.', ',')})</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="w-24"><label className="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center opacity-70">Qtd</label>
+                                            <input type="number" min="1" required className="w-full p-5 rounded-3xl bg-tinput text-tmain text-center font-black border border-tborder transition-colors" value={quantidadeVenda} onChange={e=>{setQuantidadeVenda(e.target.value); setErroVenda('');}} />
+                                        </div>
+                                    </div>
+                                    {erroVenda && <p className="text-xs text-red-500 font-black bg-red-500/10 p-4 rounded-2xl border border-red-500/20 text-center transition-all">{erroVenda}</p>}
+                                    <button className="w-full bg-indigo-500 text-white p-6 rounded-[30px] font-black text-xl shadow-2xl active:scale-95 transition-all">Confirmar</button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* EDIÇÃO DOCE */}
+                    {editandoDoce && (
+                        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
+                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
+                                <h3 className="text-2xl font-black text-tmain mb-8 text-center uppercase tracking-tighter">Editar Produto</h3>
+                                <form onSubmit={atualizarDoce} className="space-y-4">
+                                    <label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70">Nome do Produto</label>
+                                    <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoDoce.nome} onChange={e=>setEditandoDoce({...editandoDoce, nome:e.target.value})} />
+                                    <div className="flex space-x-3">
+                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70">Preço R$</label>
+                                            <input type="number" step="0.01" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoDoce.preco} onChange={e=>setEditandoDoce({...editandoDoce, preco:e.target.value})} />
+                                        </div>
+                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70">Estoque</label>
+                                            <input type="number" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoDoce.estoque} onChange={e=>setEditandoDoce({...editandoDoce, estoque:e.target.value})} />
+                                        </div>
+                                    </div>
+                                    <div className="flex space-x-3 pt-6">
+                                        <button type="button" onClick={()=>setEditandoDoce(null)} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all outline-none">Cancelar</button>
+                                        <button className="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl active:scale-95 transition-all outline-none">Salvar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* EDIÇÃO CLIENTE */}
+                    {editandoCliente && (
+                        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
+                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
+                                <h3 className="text-2xl font-black text-tmain mb-8 text-center uppercase tracking-tighter">Editar Cliente</h3>
+                                <form onSubmit={atualizarCliente} className="space-y-4">
+                                    <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" value={editandoCliente.nome} onChange={e=>setEditandoCliente({...editandoCliente, nome:e.target.value})} />
+                                    <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" value={editandoCliente.departamento} onChange={e=>setEditandoCliente({...editandoCliente, departamento:e.target.value})} />
+                                    <input type="tel" className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" value={editandoCliente.whatsapp} onChange={e=>setEditandoCliente({...editandoCliente, whatsapp:e.target.value})} />
+                                    <div className="flex space-x-3 pt-6">
+                                        <button type="button" onClick={()=>setEditandoCliente(null)} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all outline-none">Cancelar</button>
+                                        <button className="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl active:scale-95 transition-all outline-none">Salvar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* MODAL PAGAMENTO */}
+                    {modalPagamento.aberto && (
+                        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-xl transition-all">
+                            <div className="bg-tcard rounded-[50px] p-10 w-full max-w-sm border border-tborder shadow-2xl transition-all">
+                                <h3 className="text-3xl font-black text-tmain mb-1 text-center transition-all">Receber</h3>
+                                <p className="text-sm text-tmuted mb-10 text-center font-bold tracking-widest uppercase opacity-60 transition-all">Total: R$ {modalPagamento.totalDevido.toFixed(2).replace('.', ',')}</p>
+                                <form onSubmit={confirmarPagamento} className="space-y-6">
+                                    <div className="relative transition-all">
+                                        <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-tmuted text-xl">R$</span>
+                                        <input type="number" step="0.01" required className="w-full p-8 pl-14 rounded-[35px] bg-tinput text-tmain text-4xl font-black outline-none border border-tborder shadow-inner transition-colors" value={valorPagamento} onChange={e=>setValorPagamento(e.target.value)} autoFocus />
+                                    </div>
+                                    <button className="w-full bg-emerald-500 text-white p-8 rounded-[35px] font-black text-2xl shadow-2xl active:scale-95 transition-all">Confirmar Pagamento</button>
+                                    <button type="button" onClick={()=>setModalPagamento({aberto:false})} className="w-full text-tmuted font-black py-2 uppercase text-xs tracking-widest opacity-40 outline-none">Voltar</button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* MODAL CONFIRMAÇÃO */}
+                    {modalConfirm.aberto && (
+                        <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 backdrop-blur-md transition-all">
+                            <div className="bg-tcard rounded-[40px] p-8 w-full max-w-xs border border-tborder shadow-2xl text-center transition-colors">
+                                <div className="mx-auto bg-red-500/10 text-red-500 w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-all"><Icon name="alert-circle" className="w-10 h-10" /></div>
+                                <p className="font-black text-tmain mb-8 leading-tight text-xl transition-all">{modalConfirm.mensagem}</p>
+                                <div className="flex space-x-3 transition-all">
+                                    <button onClick={()=>setModalConfirm({aberto:false})} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase active:scale-95 transition-all outline-none">Não</button>
+                                    <button onClick={modalConfirm.onConfirm} className="flex-1 p-5 rounded-3xl bg-red-500 text-white font-black uppercase shadow-xl active:scale-95 transition-all outline-none">Sim</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* TOASTS */}
+                    {toast.aberto && (
+                        <div className={`fixed top-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-full shadow-2xl z-[100] text-white flex items-center font-black text-sm border border-white/20 transition-all duration-500 ${toast.tipo==='erro'?'bg-red-500':'bg-indigo-500 translate-y-0'}`}>
+                            <Icon name={toast.tipo==='erro'?'alert-circle':'check-circle-2'} className="w-5 h-5 mr-3" />
+                            {toast.mensagem}
+                        </div>
+                    )}
+                </div>
+            );
         }
 
-        // --- INICIALIZAÇÃO ---
-        renderAll();
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
 
-        // SW PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 const scope = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-                navigator.serviceWorker.register('sw.js', { scope: scope }).catch(()=>{});
+                navigator.serviceWorker.register('sw.js', { scope: scope })
+                    .then(function(reg) { console.log('SW registrado:', reg.scope); })
+                    .catch(function(err) { console.warn('PWA desativado (local ou erro):', err); });
             });
         }
     </script>

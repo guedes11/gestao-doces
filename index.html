@@ -76,14 +76,14 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        const APP_VERSION = "2.5.2"; 
+        const APP_VERSION = "2.5.0"; 
 
         const ICONS = {
             store: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>`,
             users: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
             candy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.5 7.5-2 2a4.95 4.95 0 1 0 7 7l2-2a4.95 4.95 0 1 0-7-7Z"/><path d="M14 6.5v10"/><path d="M10 7.5v10"/><path d="m16 7 1-5 1.36.68A3 3 0 0 0 19.7 3h.3v.3a3 3 0 0 0-.68 1.34L20 6l-4 1Z"/><path d="m8 17-1 5-1.36-.68A3 3 0 0 0 4.3 21H4v-.3a3 3 0 0 0 .68-1.34L4 18l4-1Z"/></svg>`,
             history: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>`,
-            receipt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17V7"/></svg>`,
+            receipt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17V7"/></svg>`,
             'layout-dashboard': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>`,
             wallet: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>`,
             'shopping-cart': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`,
@@ -333,9 +333,9 @@
 
             return (
                 <div className="min-h-screen relative pb-24 transition-colors duration-300">
-                    <header className="bg-tcard pt-10 pb-5 px-6 border-b border-tborder sticky top-0 z-10 shadow-sm flex justify-center items-center">
+                    <header className="bg-tcard pt-10 pb-5 px-6 border-b border-tborder sticky top-0 z-10 shadow-sm flex justify-center items-center transition-colors">
                         <h1 className="text-xl font-extrabold text-indigo-500 uppercase tracking-widest text-center">Gestão de Doces</h1>
-                        <button onClick={() => setModalAjustes(true)} className="absolute right-6 p-2 bg-slate-500/10 rounded-full text-tmuted outline-none">
+                        <button onClick={() => setModalAjustes(true)} className="absolute right-6 p-2 bg-slate-500/10 rounded-full text-tmuted outline-none transition-colors">
                             <Icon name="settings" className="w-5 h-5" />
                         </button>
                     </header>
@@ -477,14 +477,13 @@
                                 <div className="space-y-3">
                                     {(() => {
                                         const agrupados = logsPagamentos.reduce((acc, log) => {
-                                            if (!log.clienteId) return acc;
-                                            if (!acc[log.clienteId]) acc[log.clienteId] = { nome: log.clienteNome || "Cliente Desconhecido", total: 0, logs: [] };
+                                            if (!acc[log.clienteId]) acc[log.clienteId] = { nome: log.clienteNome, total: 0, logs: [] };
                                             acc[log.clienteId].total += log.valor;
                                             acc[log.clienteId].logs.push(log);
                                             return acc;
                                         }, {});
 
-                                        const listaAgrupada = Object.entries(agrupados).sort((a,b) => (a[1].nome || "").localeCompare(b[1].nome || ""));
+                                        const listaAgrupada = Object.entries(agrupados).sort((a,b) => a[1].nome.localeCompare(b[1].nome));
 
                                         if (listaAgrupada.length === 0) {
                                             return <div className="text-center text-tmuted p-6 bg-tcard rounded-xl border border-tborder">Nenhum pagamento registrado.</div>;
@@ -546,11 +545,11 @@
                     {modalAjustes && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
                             <div className="bg-tcard rounded-3xl p-6 w-full max-w-sm border border-tborder shadow-2xl">
-                                <div className="flex justify-between items-center mb-6 border-b border-tborder pb-4 transition-all">
+                                <div className="flex justify-between items-center mb-6 border-b border-tborder pb-4">
                                     <h3 className="text-lg font-bold text-tmain flex items-center"><Icon name="settings" className="w-5 h-5 mr-2 text-indigo-500" /> Configurações</h3>
                                     <button onClick={()=>setModalAjustes(false)} className="text-tmuted bg-slate-500/10 p-2 rounded-full active:scale-90 transition-all outline-none"><Icon name="x" className="w-5 h-5" /></button>
                                 </div>
-                                <div className="space-y-6 transition-all">
+                                <div className="space-y-6">
                                     <div>
                                         <label className="text-[10px] font-black text-tmuted uppercase mb-3 block tracking-widest text-center opacity-70">Tema Visual</label>
                                         <div className="flex bg-tinput p-1.5 rounded-2xl border border-tborder transition-colors">
@@ -559,12 +558,12 @@
                                             ))}
                                         </div>
                                     </div>
-                                    <div className="border-t border-tborder pt-6 space-y-3 transition-all">
-                                        <button onClick={gerarBackup} className="w-full flex items-center justify-center p-4 bg-indigo-500/10 text-indigo-500 font-black text-sm rounded-2xl border border-indigo-500/20 active:scale-95 transition-all shadow-lg"><Icon name="download" className="w-4 h-4 mr-2" /> Salvar Backup</button>
-                                        <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={e=>{carregarBackup(e); setModalAjustes(false);}} />
+                                    <div className="border-t border-tborder pt-6 space-y-3">
+                                        <button onClick={exportarDados} className="w-full flex items-center justify-center p-4 bg-indigo-500/10 text-indigo-500 font-black text-sm rounded-2xl border border-indigo-500/20 active:scale-95 transition-all shadow-lg"><Icon name="download" className="w-4 h-4 mr-2" /> Salvar Backup</button>
+                                        <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={e=>{importarDados(e); setModalAjustes(false);}} />
                                         <button onClick={()=>fileInputRef.current.click()} className="w-full flex items-center justify-center p-4 bg-slate-500/10 text-tmuted font-black text-sm rounded-2xl border border-tborder active:scale-95 transition-all shadow-sm"><Icon name="upload" className="w-4 h-4 mr-2" /> Restaurar Backup</button>
                                     </div>
-                                    <div className="text-center space-y-1 pt-2 opacity-60 transition-all">
+                                    <div className="text-center space-y-1 pt-2 opacity-60">
                                         <p className="text-[10px] text-tmuted font-bold tracking-widest uppercase transition-all">Versão {APP_VERSION}</p>
                                         <p className="text-[9px] text-indigo-500/80 font-black uppercase tracking-tighter transition-all">Desenvolvido por Gemini</p>
                                     </div>
@@ -577,17 +576,17 @@
                     {modalVenda.aberto && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
                             <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
-                                <div className="flex justify-between items-center mb-8 transition-all"><h3 className="text-2xl font-black text-tmain transition-all">Nova Venda</h3><button onClick={()=>setModalVenda({aberto:false})} className="p-2 text-tmuted bg-slate-500/10 rounded-full active:scale-90 transition-transform outline-none"><Icon name="x" className="w-6 h-6" /></button></div>
-                                <form onSubmit={registrarVenda} className="space-y-6 transition-all">
-                                    <p className="text-sm font-bold text-tmuted uppercase tracking-widest text-center transition-all">Cliente: <span className="text-indigo-500 font-black transition-all">{modalVenda.clienteNome}</span></p>
+                                <div className="flex justify-between items-center mb-8 transition-all"><h3 className="text-2xl font-black text-tmain">Nova Venda</h3><button onClick={()=>setModalVenda({aberto:false})} className="p-2 text-tmuted bg-slate-500/10 rounded-full active:scale-90 transition-transform outline-none"><Icon name="x" className="w-6 h-6" /></button></div>
+                                <form onSubmit={registrarVenda} className="space-y-6">
+                                    <p className="text-sm font-bold text-tmuted uppercase tracking-widest text-center">Cliente: <span className="text-indigo-500 font-black transition-all">{modalVenda.clienteNome}</span></p>
                                     <div className="flex space-x-3 transition-all">
-                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center opacity-70 transition-all">Produto</label>
+                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center opacity-70">Produto</label>
                                             <select required className="w-full p-5 rounded-3xl bg-tinput text-tmain outline-none font-bold text-sm border border-tborder transition-colors" value={doceSelecionado} onChange={e=>{setDoceSelecionado(e.target.value); setErroVenda('');}}>
                                                 <option value="" disabled>Escolher doce...</option>
                                                 {doces.map(d=><option key={d.id} value={d.id} disabled={d.estoque<=0}>{d.nome} (R$ {d.preco.toFixed(2).replace('.', ',')})</option>)}
                                             </select>
                                         </div>
-                                        <div className="w-24"><label className="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center opacity-70 transition-all">Qtd</label>
+                                        <div className="w-24"><label className="text-[10px] font-black uppercase text-tmuted mb-2 block tracking-widest text-center opacity-70">Qtd</label>
                                             <input type="number" min="1" required className="w-full p-5 rounded-3xl bg-tinput text-tmain text-center font-black border border-tborder transition-colors" value={quantidadeVenda} onChange={e=>{setQuantidadeVenda(e.target.value); setErroVenda('');}} />
                                         </div>
                                     </div>
@@ -602,21 +601,21 @@
                     {editandoDoce && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
                             <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
-                                <h3 className="text-2xl font-black text-tmain mb-8 text-center uppercase tracking-tighter transition-all">Editar Produto</h3>
-                                <form onSubmit={atualizarDoce} className="space-y-4 transition-all">
-                                    <label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70 transition-all">Nome do Produto</label>
+                                <h3 className="text-2xl font-black text-tmain mb-8 text-center uppercase tracking-tighter">Editar Produto</h3>
+                                <form onSubmit={atualizarDoce} className="space-y-4">
+                                    <label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70">Nome do Produto</label>
                                     <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoDoce.nome} onChange={e=>setEditandoDoce({...editandoDoce, nome:e.target.value})} />
-                                    <div className="flex space-x-3 transition-all">
-                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70 transition-all">Preço R$</label>
+                                    <div className="flex space-x-3">
+                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70">Preço R$</label>
                                             <input type="number" step="0.01" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoDoce.preco} onChange={e=>setEditandoDoce({...editandoDoce, preco:e.target.value})} />
                                         </div>
-                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70 transition-all">Estoque</label>
+                                        <div className="flex-1"><label className="text-[10px] font-black uppercase text-tmuted mb-1 block tracking-widest opacity-70">Estoque</label>
                                             <input type="number" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={editandoDoce.estoque} onChange={e=>setEditandoDoce({...editandoDoce, estoque:e.target.value})} />
                                         </div>
                                     </div>
-                                    <div className="flex space-x-3 pt-6 transition-all">
-                                        <button type="button" onClick={()=>setEditandoDoce(null)} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all outline-none transition-all outline-none">Cancelar</button>
-                                        <button className="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl active:scale-95 transition-all outline-none transition-all outline-none">Salvar</button>
+                                    <div className="flex space-x-3 pt-6">
+                                        <button type="button" onClick={()=>setEditandoDoce(null)} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all outline-none">Cancelar</button>
+                                        <button className="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl active:scale-95 transition-all outline-none">Salvar</button>
                                     </div>
                                 </form>
                             </div>
@@ -627,14 +626,14 @@
                     {editandoCliente && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
                             <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
-                                <h3 className="text-2xl font-black text-tmain mb-8 text-center uppercase tracking-tighter transition-all">Editar Cliente</h3>
-                                <form onSubmit={atualizarCliente} className="space-y-4 transition-all">
+                                <h3 className="text-2xl font-black text-tmain mb-8 text-center uppercase tracking-tighter">Editar Cliente</h3>
+                                <form onSubmit={atualizarCliente} className="space-y-4">
                                     <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" value={editandoCliente.nome} onChange={e=>setEditandoCliente({...editandoCliente, nome:e.target.value})} />
                                     <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" value={editandoCliente.departamento} onChange={e=>setEditandoCliente({...editandoCliente, departamento:e.target.value})} />
                                     <input type="tel" className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" value={editandoCliente.whatsapp} onChange={e=>setEditandoCliente({...editandoCliente, whatsapp:e.target.value})} />
-                                    <div className="flex space-x-3 pt-6 transition-all">
-                                        <button type="button" onClick={()=>setEditandoCliente(null)} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all outline-none outline-none">Cancelar</button>
-                                        <button className="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl active:scale-95 transition-all outline-none transition-all outline-none">Salvar</button>
+                                    <div className="flex space-x-3 pt-6">
+                                        <button type="button" onClick={()=>setEditandoCliente(null)} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all outline-none">Cancelar</button>
+                                        <button className="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl active:scale-95 transition-all outline-none">Salvar</button>
                                     </div>
                                 </form>
                             </div>
@@ -647,13 +646,13 @@
                             <div className="bg-tcard rounded-[50px] p-10 w-full max-w-sm border border-tborder shadow-2xl transition-all">
                                 <h3 className="text-3xl font-black text-tmain mb-1 text-center transition-all">Receber</h3>
                                 <p className="text-sm text-tmuted mb-10 text-center font-bold tracking-widest uppercase opacity-60 transition-all">Total: R$ {modalPagamento.totalDevido.toFixed(2).replace('.', ',')}</p>
-                                <form onSubmit={confirmarPagamento} className="space-y-6 transition-all">
+                                <form onSubmit={confirmarPagamento} className="space-y-6">
                                     <div className="relative transition-all">
-                                        <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-tmuted text-xl transition-all">R$</span>
+                                        <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-tmuted text-xl">R$</span>
                                         <input type="number" step="0.01" required className="w-full p-8 pl-14 rounded-[35px] bg-tinput text-tmain text-4xl font-black outline-none border border-tborder shadow-inner transition-colors" value={valorPagamento} onChange={e=>setValorPagamento(e.target.value)} autoFocus />
                                     </div>
                                     <button className="w-full bg-emerald-500 text-white p-8 rounded-[35px] font-black text-2xl shadow-2xl active:scale-95 transition-all">Confirmar Pagamento</button>
-                                    <button type="button" onClick={()=>setModalPagamento({aberto:false})} className="w-full text-tmuted font-black py-2 uppercase text-xs tracking-widest opacity-40 outline-none transition-all">Voltar</button>
+                                    <button type="button" onClick={()=>setModalPagamento({aberto:false})} className="w-full text-tmuted font-black py-2 uppercase text-xs tracking-widest opacity-40 outline-none">Voltar</button>
                                 </form>
                             </div>
                         </div>
@@ -666,8 +665,8 @@
                                 <div className="mx-auto bg-red-500/10 text-red-500 w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-all"><Icon name="alert-circle" className="w-10 h-10" /></div>
                                 <p className="font-black text-tmain mb-8 leading-tight text-xl transition-all">{modalConfirm.mensagem}</p>
                                 <div className="flex space-x-3 transition-all">
-                                    <button onClick={()=>setModalConfirm({aberto:false})} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase active:scale-95 transition-all outline-none transition-all outline-none">Não</button>
-                                    <button onClick={modalConfirm.onConfirm} className="flex-1 p-5 rounded-3xl bg-red-500 text-white font-black uppercase shadow-xl active:scale-95 transition-all outline-none transition-all outline-none">Sim</button>
+                                    <button onClick={()=>setModalConfirm({aberto:false})} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase active:scale-95 transition-all outline-none">Não</button>
+                                    <button onClick={modalConfirm.onConfirm} className="flex-1 p-5 rounded-3xl bg-red-500 text-white font-black uppercase shadow-xl active:scale-95 transition-all outline-none">Sim</button>
                                 </div>
                             </div>
                         </div>

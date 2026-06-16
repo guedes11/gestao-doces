@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" translate="no">
+<html lang="pt-BR" translate="no" class="notranslate">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -98,7 +98,7 @@
             'alert-circle': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>`,
             'chevron-down': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`,
             'chevron-up': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`,
-            settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`,
+            settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`,
             sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`,
             database: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>`
         };
@@ -159,7 +159,7 @@
                 setTimeout(() => setToast(t => ({ ...t, aberto: false })), 3000);
             };
 
-            const gerarBackupArquivo = () => {
+            const salvarCopia = () => {
                 const dados = { clientes, doces, vendas, pagamentos, logsPagamentos };
                 const blob = new Blob([JSON.stringify(dados)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -172,7 +172,7 @@
                 mostrarToast("Backup exportado!", "success");
             };
 
-            const lerBackupArquivo = (event) => {
+            const restaurarCopia = (event) => {
                 const file = event.target.files[0];
                 if (!file) return;
                 const reader = new FileReader();
@@ -509,7 +509,7 @@
                                                     {exp && (
                                                         <div className="bg-tinput p-4 border-t border-tborder space-y-2 transition-colors">
                                                             {dados.logs.sort((a,b)=>b.timestamp-a.timestamp).map(l => (
-                                                                <div key={l.id} className="flex justify-between items-center text-sm border-b border-tborder/50 pb-2 last:border-b-0 last:pb-0">
+                                                                <div key={l.id} className="flex justify-between items-center text-sm border-b border-tborder/50 pb-2 last:border-b-0 last:pb-0 pt-1">
                                                                     <div className="flex flex-col">
                                                                         <span className="text-[10px] text-tmuted font-bold uppercase">{l.data} às {l.hora}</span>
                                                                     </div>
@@ -532,7 +532,7 @@
                         )}
                     </main>
 
-                    {}
+                    {/* NAVEGAÇÃO INFERIOR */}
                     <nav className="fixed bottom-0 left-0 right-0 bg-tcard border-t border-tborder pb-safe z-20 shadow-lg flex justify-around p-2 transition-colors">
                         <button onClick={()=>setAbaAtiva('resumo')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='resumo'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="layout-dashboard" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Vendas</span></button>
                         <button onClick={()=>setAbaAtiva('clientes')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='clientes'?'text-indigo-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="users" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Clientes</span></button>
@@ -540,7 +540,7 @@
                         <button onClick={()=>setAbaAtiva('caixa')} className={`flex flex-col items-center p-2 transition-all ${abaAtiva==='caixa'?'text-emerald-500 scale-110':'text-tmuted opacity-60'}`}><Icon name="wallet" className="w-6 h-6" /><span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Caixa</span></button>
                     </nav>
 
-                    {}
+                    {/* MODAL CONFIGURAÇÕES */}
                     {modalAjustes && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
                             <div className="bg-tcard rounded-3xl p-6 w-full max-w-sm border border-tborder shadow-2xl">
@@ -558,8 +558,8 @@
                                         </div>
                                     </div>
                                     <div className="border-t border-tborder pt-6 space-y-3 transition-all">
-                                        <button onClick={gerarBackupArquivo} className="w-full flex items-center justify-center p-4 bg-indigo-500/10 text-indigo-500 font-black text-sm rounded-2xl border border-indigo-500/20 active:scale-95 transition-all shadow-lg"><Icon name="download" className="w-4 h-4 mr-2" /> Salvar Backup</button>
-                                        <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={e=>{lerBackupArquivo(e); setModalAjustes(false);}} />
+                                        <button onClick={salvarCopia} className="w-full flex items-center justify-center p-4 bg-indigo-500/10 text-indigo-500 font-black text-sm rounded-2xl border border-indigo-500/20 active:scale-95 transition-all shadow-lg"><Icon name="download" className="w-4 h-4 mr-2" /> Salvar Backup</button>
+                                        <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={e=>{restaurarCopia(e); setModalAjustes(false);}} />
                                         <button onClick={()=>fileInputRef.current.click()} className="w-full flex items-center justify-center p-4 bg-slate-500/10 text-tmuted font-black text-sm rounded-2xl border border-tborder active:scale-95 transition-all shadow-sm"><Icon name="upload" className="w-4 h-4 mr-2" /> Restaurar Backup</button>
                                     </div>
                                     <div className="text-center space-y-1 pt-2 opacity-60 transition-all">
@@ -571,6 +571,7 @@
                         </div>
                     )}
 
+                    {/* MODAL VENDA */}
                     {modalVenda.aberto && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
                             <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
@@ -595,6 +596,7 @@
                         </div>
                     )}
 
+                    {/* EDIÇÃO DOCE */}
                     {editandoDoce && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
                             <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
@@ -619,6 +621,7 @@
                         </div>
                     )}
 
+                    {/* EDIÇÃO CLIENTE */}
                     {editandoCliente && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
                             <div className="bg-tcard rounded-[40px] p-8 w-full max-w-sm border border-tborder shadow-2xl transition-all">
@@ -628,7 +631,7 @@
                                     <input type="text" required className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" value={editandoCliente.departamento} onChange={e=>setEditandoCliente({...editandoCliente, departamento:e.target.value})} />
                                     <input type="tel" className="w-full p-5 rounded-3xl bg-tinput text-tmain font-black border border-tborder outline-none transition-all" value={editandoCliente.whatsapp} onChange={e=>setEditandoCliente({...editandoCliente, whatsapp:e.target.value})} />
                                     <div className="flex space-x-3 pt-6 transition-all">
-                                        <button type="button" onClick={()=>setEditandoCliente(null)} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all outline-none transition-all outline-none">Cancelar</button>
+                                        <button type="button" onClick={()=>setEditandoCliente(null)} className="flex-1 p-5 rounded-3xl bg-slate-500/10 text-tmuted font-black uppercase text-sm active:scale-95 transition-all outline-none outline-none">Cancelar</button>
                                         <button className="flex-1 p-5 rounded-3xl bg-indigo-500 text-white font-black uppercase text-sm shadow-xl active:scale-95 transition-all outline-none transition-all outline-none">Salvar</button>
                                     </div>
                                 </form>
@@ -636,6 +639,7 @@
                         </div>
                     )}
 
+                    {/* MODAL PAGAMENTO */}
                     {modalPagamento.aberto && (
                         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-xl transition-all">
                             <div className="bg-tcard rounded-[50px] p-10 w-full max-w-sm border border-tborder shadow-2xl transition-all">
@@ -653,6 +657,7 @@
                         </div>
                     )}
 
+                    {/* MODAL CONFIRMAÇÃO */}
                     {modalConfirm.aberto && (
                         <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 backdrop-blur-md transition-all">
                             <div className="bg-tcard rounded-[40px] p-8 w-full max-w-xs border border-tborder shadow-2xl text-center transition-colors">
@@ -666,6 +671,7 @@
                         </div>
                     )}
 
+                    {/* TOASTS */}
                     {toast.aberto && (
                         <div className={`fixed top-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-full shadow-2xl z-[100] text-white flex items-center font-black text-sm border border-white/20 transition-all duration-500 ${toast.tipo==='erro'?'bg-red-500':'bg-indigo-500 translate-y-0'}`}>
                             <Icon name={toast.tipo==='erro'?'alert-circle':'check-circle-2'} className="w-5 h-5 mr-3" />
@@ -684,7 +690,7 @@
                 const scope = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
                 navigator.serviceWorker.register('sw.js', { scope: scope })
                     .then(function(reg) { console.log('SW registrado:', reg.scope); })
-                    .catch(function(err) { console.warn('PWA desativado:', err); });
+                    .catch(function(err) { console.warn('PWA desativado (local ou erro):', err); });
             });
         }
     </script>
